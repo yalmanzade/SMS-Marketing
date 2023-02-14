@@ -1,0 +1,62 @@
+﻿@model SMS_Marketing.Models.Organization
+@{
+    ViewData["Title"] = "Index";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<section>
+    <div class="container">
+        @{
+            if(ViewBag.Error != null)
+            {
+                <div class="row">
+                    <div class="col-12">
+                        <div class="alert alert-danger" role="alert">
+                            @ViewBag.Error
+                        </div>
+                    </div>
+                </div>
+            }
+        }
+        <div class="row">
+            <div class="col">
+                <div class="card" style="width: 18rem;">
+                    <div class="card-body">
+                        <h5 class="card-title">Add an Organization</h5>
+                        <h6 class="card-subtitle mb-2 text-muted">Use the form below</h6>
+                        <div class="card-body">
+                            <form method="post">
+                                <div class="form-floating mb-3">
+                                    <input type="text" class="form-control" placeholder="Org. Name" asp-for="Name">
+                                    <label for="floatingInput">Organization Name</label>
+                                </div>
+                                <div class="form-floating mb-3">
+                                    <select class="form-select form-select-sm mb-3" asp-for="ManagerId">
+                                        @{
+                                            var userList = ViewBag.UserList;
+                                            if (userList != null)
+                                            {
+                                                foreach (var user in userList)
+                                                {
+                                                    <option value="@user.Id">@user.FirstName @user.LastName</option>
+                                                }
+                                            }
+                                            else
+                                            {
+                                                <option value="0">There Has Been an Error</option>
+                                            }
+                                        }
+                                    </select>
+                                    <label for="floatingInput">Pick a Manager</label>
+                                </div>
+                                <div class="input-group">
+                                    <button type="submit" class="btn btn-primary mb-3">Add Organization</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
