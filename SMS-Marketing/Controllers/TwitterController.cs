@@ -19,8 +19,8 @@ namespace SMS_Marketing.Controllers
             {
                 CredentialStore = new SessionStateCredentialStore(HttpContext.Session)
                 {
-                    ConsumerKey = "SDyA6NEPZijc5Dru03t2l7H9p",
-                    ConsumerSecret = "10v0HH6SH9XOmvoKOeTLSVLl1EZeaZ8bI6cH783SMycJqdTbLw"
+                    ConsumerKey = "",
+                    ConsumerSecret = ""
                 }
             };
             //await auth.CredentialStore.ClearAsync();
