@@ -5,30 +5,7 @@
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 <h1>Welcome Admin</h1>
-<section>
-         @{
-            if(ViewBag.Success != null)
-            {
-                <div class="row">
-                    <div class="col-12">
-                        <div class="alert alert-success" role="alert">
-                            @ViewBag.Success
-                        </div>
-                    </div>
-                </div>
-            }
-            if(ViewBag.Error != null)
-            {
-                <div class="row">
-                    <div class="col-12">
-                        <div class="alert alert-danger" role="alert">
-                            @ViewBag.Error
-                        </div>
-                    </div>
-                </div>
-            }
-        }
-</section>
+
 <section>
     <ul class="nav nav-tabs">
         <li class="nav-item">
@@ -76,11 +53,11 @@
                                       <td>
                                           @if (organization.IsActive)
                                           {
-                                                <button type="button" class="btn btn-info" disabled>Active</button>
+                                             <button type="button" class="btn btn-info" disabled>Active</button>
                                           }
                                           else
                                           {
-                                                <button type="button" class="btn btn-danger" disabled>Inactive</button>
+                                             <button type="button" class="btn btn-danger" disabled>Inactive</button>
                                           }
                                       </td>
                                       <td>

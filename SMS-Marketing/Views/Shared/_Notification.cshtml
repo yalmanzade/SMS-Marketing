@@ -1,0 +1,24 @@
+﻿<section>
+    @{
+        if (ViewBag.Success != null)
+        {
+           <div class="row">
+               <div class="col-12">
+                   <div class="alert alert-success" role="alert">
+                        @ViewBag.Success
+                   </div>
+               </div>
+           </div>
+        }
+        if (ViewBag.Error != null)
+        {
+            <div class="row">
+                <div class="col-12">
+                    <div class="alert alert-danger" role="alert">
+                        @ViewBag.Error
+                    </div>
+                </div>
+            </div>
+        }
+    }
+</section>

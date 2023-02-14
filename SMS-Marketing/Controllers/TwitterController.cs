@@ -15,18 +15,25 @@ namespace SMS_Marketing.Controllers
         //GET: TwitterController/Details/5
         public async Task<ActionResult> Login()
         {
-            var auth = new MvcAuthorizer
+            try
             {
-                CredentialStore = new SessionStateCredentialStore(HttpContext.Session)
+                var twitterConfiguration = new ConfigurationBuilder().AddJsonFile("appsettings.json").Build();
+                var auth = new MvcAuthorizer
                 {
-                    ConsumerKey = "",
-                    ConsumerSecret = ""
-                }
-            };
-            //await auth.CredentialStore.ClearAsync();
-            string twitterCallbackUrl = Request.GetDisplayUrl().Replace("Login", "CompleteLogin");
-            return await auth.BeginAuthorizationAsync(new Uri(twitterCallbackUrl));
-            //return View();
+                    CredentialStore = new SessionStateCredentialStore(HttpContext.Session)
+                    {
+                        ConsumerKey = twitterConfiguration.GetValue<string>("Twitter:Key"),
+                        ConsumerSecret = twitterConfiguration.GetValue<string>("Twitter:Secret")
+                    }
+                };
+                //await auth.CredentialStore.ClearAsync();
+                string twitterCallbackUrl = Request.GetDisplayUrl().Replace("Login", "CompleteLogin");
+                return await auth.BeginAuthorizationAsync(new Uri(twitterCallbackUrl));
+            }
+            catch (Exception ex)
+            {
+                return View();
+            }
         }
         //GET: TwitterController/Details/5
         public async Task<ActionResult> CompleteLogin()

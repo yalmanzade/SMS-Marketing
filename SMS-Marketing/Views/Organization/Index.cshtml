@@ -1,0 +1,47 @@
+﻿@model Organization
+@{
+    ViewData["Title"] = "Organization " + @Model.Name;
+}
+<section class="container">
+    <h1>Organization: @Model.Name</h1>
+</section>
+<section class="container">
+    <h1>
+        @Model.ManagerName, Welcome to your organization.
+    </h1>
+</section>
+
+<section class="container">
+    <nav aria-label="breadcrumb">
+      <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="#">Home</a></li>
+        <li class="breadcrumb-item active" aria-current="page">@Model.Name</li>
+      </ol>
+    </nav>
+</section>
+<section class="container">
+    <ul class="nav nav-tabs">
+        <li class="nav-item">
+            <a class="nav-link active" aria-current="page" href="#">Posts</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" href="/Organization/UserManagement/@Model.Id">User Management</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" href="#">Customer</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" href="#">Insight</a>
+        </li>
+    </ul>
+</section>
+<section class="container">
+    <div class="row">
+        <div class="col">
+            <partial name="_OrgPost" model="Model"/>
+        </div>
+        <div class="col">
+
+        </div>
+    </div>
+</section>

@@ -1,0 +1,46 @@
+﻿<section class="container">
+    <form>
+        <div class="input-group">
+          <span class="input-group-text">New Post</span>
+          <textarea class="form-control" aria-label="New Post"></textarea>
+        </div>
+        @{
+            if (Model.IsSMS)
+            {
+                <div class="input-group">
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="flexCheckDefault">
+                        <label class="form-check-label" for="flexCheckDefault">
+                            SMS Message
+                        </label>
+                    </div>
+                </div>
+            }
+            if (Model.IsTwitter)
+            {
+                <div class="input-group">
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="flexCheckDefault">
+                        <label class="form-check-label" for="flexCheckDefault">
+                            Twitter
+                        </label>
+                    </div>
+                </div>
+            }
+            if (Model.IsFacebook)
+            {
+                <div class="input-group">
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="flexCheckDefault">
+                        <label class="form-check-label" for="flexCheckDefault">
+                            Facebook
+                        </label>
+                    </div>
+                </div>
+            }
+        }
+        <a href="/Organization/Post/@Model.Id" class="btn btn-primary">
+            Submit
+        </a>
+    </form>
+</section>
