@@ -8,8 +8,11 @@ namespace SMS_Marketing.Models
     {
         [Key]
         [Required]
-        [DisplayName("Organization ID")]
+        [DisplayName("Id")]
         public int Id { get; set; }
+        [Required]
+        [DisplayName("Organization ID")]
+        public int OrganizationId { get; set; }
         [Required]
         [DisplayName("Body")]
         [DataType(DataType.Text)]

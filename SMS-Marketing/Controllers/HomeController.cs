@@ -1,21 +1,32 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
 using SMS_Marketing.Models;
 using System.Diagnostics;
 
 namespace SMS_Marketing.Controllers
 {
+    [Authorize]
     public class HomeController : Controller
     {
         private readonly ILogger<HomeController> _logger;
+        private readonly UserManager<AppUser> _userManager;
+        private readonly SignInManager<AppUser> _signInManager;
 
-        public HomeController(ILogger<HomeController> logger)
+        public HomeController(ILogger<HomeController> logger, UserManager<AppUser> userManager,
+            SignInManager<AppUser> signInManage)
         {
+            _userManager = userManager;
+            _signInManager = signInManage;
             _logger = logger;
         }
 
-        public IActionResult Index()
+        public async Task<IActionResult> Index()
         {
-
+            if (_signInManager.IsSignedIn(User))
+            {
+                AppUser? user = await _userManager.GetUserAsync(User);
+            }
             return View();
         }
 

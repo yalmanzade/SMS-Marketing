@@ -10,6 +10,7 @@ namespace SMS_Marketing.Data
             : base(options)
         {
         }
-        public DbSet<TwitterAuth> TwitterAuth { get; set; } = default!;
+        //public DbSet<TwitterAuth> TwitterAuth { get; set; } = default!;
+        public DbSet<Organization> Organizations { get; set; } = default!;
     }
 }
