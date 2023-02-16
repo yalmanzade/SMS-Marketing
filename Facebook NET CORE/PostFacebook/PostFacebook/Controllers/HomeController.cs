@@ -12,25 +12,57 @@ namespace PostFacebook.Controllers
         {
             return View();
         }
-
         [HttpPost]
-        public async Task<IActionResult> Index(string accessToken, string pageId, string message)
+        public async Task<IActionResult> Index(string accessToken, string pageId, string message, IFormFile imageFile)
         {
-            var url = $"https://graph.facebook.com/v16.0/{pageId}/feed?access_token={accessToken}";
-            var data = $"message={message}";
-            var dataBytes = Encoding.UTF8.GetBytes(data);
+            var url = $"https://graph.facebook.com/{pageId}/feed?access_token={accessToken}";
 
-            using (var client = new HttpClient())
+            if (imageFile == null)
             {
-                var response = await client.PostAsync(url, new ByteArrayContent(dataBytes));
+                var data = $"message={message}";
+                var dataBytes = Encoding.UTF8.GetBytes(data);
 
-                if (response.IsSuccessStatusCode)
+                using (var client = new HttpClient())
                 {
-                    TempData["Result"] = "Post was successful.";
+                    var response = await client.PostAsync(url, new ByteArrayContent(dataBytes));
+
+                    if (response.IsSuccessStatusCode)
+                    {
+                        TempData["Result"] = "Post was successful.";
+                    }
+                    else
+                    {
+                        TempData["Result"] = "Post was unsuccessful.";
+                    }
                 }
-                else
+            }
+            else
+            {
+                url = $"https://graph.facebook.com/{pageId}/photos?access_token={accessToken}";
+
+                using (var client = new HttpClient())
                 {
-                    TempData["Result"] = "Post was unsuccessful.";
+                    using (var content = new MultipartFormDataContent())
+                    {
+                        content.Add(new StringContent(message), "message");
+
+                        using (var stream = new MemoryStream())
+                        {
+                            await imageFile.CopyToAsync(stream);
+                            content.Add(new ByteArrayContent(stream.ToArray()), "source", imageFile.FileName);
+                        }
+
+                        var response = await client.PostAsync(url, content);
+
+                        if (response.IsSuccessStatusCode)
+                        {
+                            TempData["Result"] = "Post was successful.";
+                        }
+                        else
+                        {
+                            TempData["Result"] = "Post was unsuccessful.";
+                        }
+                    }
                 }
             }
 
