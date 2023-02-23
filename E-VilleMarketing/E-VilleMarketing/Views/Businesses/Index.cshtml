@@ -1,0 +1,66 @@
+﻿@model IEnumerable<E_VilleMarketing.Models.Business>
+
+@{
+    ViewData["Title"] = "Index";
+    Layout = "~/Views/Shared/_ClientLayout.cshtml";
+}
+
+<h1>Index</h1>
+
+<p>
+    <a asp-action="Create">Create New</a>
+</p>
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model => model.BusinessName)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.BuildingNum)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.AptNum)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.StreetName)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.ZipCode)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.State)
+            </th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+@foreach (var item in Model) {
+        <tr>
+            <td>
+                @Html.DisplayFor(modelItem => item.BusinessName)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.BuildingNum)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.AptNum)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.StreetName)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.ZipCode)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.State)
+            </td>
+            <td>
+                    <a asp-action="Select" asp-route-id="@item.BusinessID"> Select</a> |
+                    <a asp-action="Details" asp-route-id="@item.BusinessID">Details</a> |
+                    <a asp-action="Delete" asp-route-id="@item.BusinessID">Delete</a>
+            </td>
+        </tr>
+}
+    </tbody>
+</table>
