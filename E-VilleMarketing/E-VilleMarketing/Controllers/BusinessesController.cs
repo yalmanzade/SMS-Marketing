@@ -37,9 +37,9 @@ namespace E_VilleMarketing.Controllers
         }
 
         // GET: Businesses
-        public async Task<IActionResult> Index()
+        public IActionResult Index()
         {
-            var databaseContext = _context.Businesses.Where(b => b.ClientID == HttpContext.Session.GetInt32("clientID")).ToListAsync();
+            var databaseContext = _context.Businesses.Where(b => b.ClientID == HttpContext.Session.GetInt32("clientID")).ToList();
             return View(databaseContext);
         }
 
