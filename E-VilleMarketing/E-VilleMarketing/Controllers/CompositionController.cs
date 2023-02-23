@@ -6,6 +6,7 @@ namespace E_VilleMarketing.Controllers
     public class CompositionController : Controller
     {
         private readonly DatabaseContext _context;
+
         public string passedLayout = "null";
         public CompositionController(DatabaseContext context)
         {
@@ -15,8 +16,11 @@ namespace E_VilleMarketing.Controllers
         {
             if (HttpContext.Session.GetInt32("clientID").HasValue)
             {
-                Console.WriteLine("has value");
                 passedLayout = "_ClientLayout";
+            }
+            else if (HttpContext.Session.GetInt32("userID").HasValue)
+            {
+                passedLayout = "_UserLayout";
             }
         }
         public IActionResult Index()

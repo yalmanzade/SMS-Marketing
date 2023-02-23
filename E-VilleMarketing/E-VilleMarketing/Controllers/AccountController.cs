@@ -11,13 +11,10 @@ namespace E_VilleMarketing.Controllers
     public class AccountController : Controller
     {
         private readonly DatabaseContext _context;
+        public string passedLayout = "null";
         public AccountController(DatabaseContext context)
         {
             _context = context;
-        }
-        public IActionResult Error()
-        {
-            return View();
         }
         public IActionResult LoginView()
         {
@@ -45,7 +42,8 @@ namespace E_VilleMarketing.Controllers
                     if (userContext != true)
                     {
                         HttpContext.Session.SetInt32("userID", _context.Users.Single(e => e.User_Email == emailInput).UserID);
-                        return RedirectToAction("Index", "Home");
+                        HttpContext.Session.SetInt32("businessID", _context.Users.Single(e => e.User_Email == emailInput).BusinessID);
+                        return RedirectToAction("Index", "Composition");
                     }
                 }
             }

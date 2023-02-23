@@ -25,6 +25,10 @@ namespace E_VilleMarketing.Controllers
             {
                 passedLayout = "_ClientLayout";
             }
+            else if (HttpContext.Session.GetInt32("userID").HasValue)
+            {
+                passedLayout = "_UserLayout";
+            }
         }
         // GET: Users
         public async Task<IActionResult> Index()

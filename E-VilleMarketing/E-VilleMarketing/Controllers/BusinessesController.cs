@@ -14,13 +14,26 @@ namespace E_VilleMarketing.Controllers
     {
         private readonly DatabaseContext _context;
 
+        public string passedLayout = "null";
         public BusinessesController(DatabaseContext context)
         {
             _context = context;
         }
-
+        public void CheckSession()
+        {
+            if (HttpContext.Session.GetInt32("clientID").HasValue)
+            {
+                passedLayout = "_ClientLayout";
+            }
+            else if (HttpContext.Session.GetInt32("userID").HasValue)
+            {
+                passedLayout = "_UserLayout";
+            }
+        }
         public async Task<IActionResult> Select(int? id)
         {
+            CheckSession();
+            ViewData["Layout"] = passedLayout;
             if (id == null || _context.Businesses == null)
             {
                 return NotFound();
@@ -39,6 +52,8 @@ namespace E_VilleMarketing.Controllers
         // GET: Businesses
         public IActionResult Index()
         {
+            CheckSession();
+            ViewData["Layout"] = passedLayout;
             var databaseContext = _context.Businesses.Where(b => b.ClientID == HttpContext.Session.GetInt32("clientID")).ToList();
             return View(databaseContext);
         }
@@ -46,6 +61,8 @@ namespace E_VilleMarketing.Controllers
         // GET: Businesses/Details/5
         public async Task<IActionResult> Details(int? id)
         {
+            CheckSession();
+            ViewData["Layout"] = passedLayout;
             if (id == null || _context.Businesses == null)
             {
                 return NotFound();
@@ -65,6 +82,8 @@ namespace E_VilleMarketing.Controllers
         // GET: Businesses/Create
         public IActionResult Create()
         {
+            CheckSession();
+            ViewData["Layout"] = passedLayout;
             return View();
         }
 
@@ -75,6 +94,8 @@ namespace E_VilleMarketing.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("BusinessID,BusinessName,BuildingNum,AptNum,StreetName,ZipCode,State,ClientID")] Business business)
         {
+            CheckSession();
+            ViewData["Layout"] = passedLayout;
             int clientID = (int)HttpContext.Session.GetInt32("clientID");
             business.ClientID = clientID;
             if (ModelState.IsValid)
@@ -89,6 +110,8 @@ namespace E_VilleMarketing.Controllers
         // GET: Businesses/Edit/5
         public async Task<IActionResult> Edit(int? id)
         {
+            CheckSession();
+            ViewData["Layout"] = passedLayout;
             if (id == null || _context.Businesses == null)
             {
                 return NotFound();
@@ -109,6 +132,8 @@ namespace E_VilleMarketing.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, [Bind("BusinessID,BusinessName,BuildingNum,AptNum,StreetName,ZipCode,State,ClientID")] Business business)
         {
+            CheckSession();
+            ViewData["Layout"] = passedLayout;
             if (id != business.BusinessID)
             {
                 return NotFound();
@@ -140,6 +165,8 @@ namespace E_VilleMarketing.Controllers
         // GET: Businesses/Delete/5
         public async Task<IActionResult> Delete(int? id)
         {
+            CheckSession();
+            ViewData["Layout"] = passedLayout;
             if (id == null || _context.Businesses == null)
             {
                 return NotFound();
@@ -161,6 +188,8 @@ namespace E_VilleMarketing.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
+            CheckSession();
+            ViewData["Layout"] = passedLayout;
             if (_context.Businesses == null)
             {
                 return Problem("Entity set 'DatabaseContext.Businesses'  is null.");
