@@ -26,42 +26,92 @@ namespace SMS_Marketing.Controllers
 
 
         // GET: SysAdminController/Delete/5
-        public async Task<ActionResult> Delete(int id)
+        public async Task<ActionResult> Disable(int? id)
         {
-            if (id == null || id == 0)
+            try
             {
-                return NotFound();
-            }
-            var organization = _context.Organizations.Find(id);
+                if (id == null || id == 0)
+                {
+                    return NotFound();
+                }
+                var organization = _context.Organizations.Find(id);
+                if (organization != null)
+                {
+                    organization.IsActive = false;
+                    _context.Update(organization);
+                    await _context.SaveChangesAsync();
+                    ViewBag.Success = "The organization was disabled.";
+                }
 
-            if (organization == null)
+                if (organization == null)
+                {
+                    return NotFound();
+                }
+            }
+            catch (Exception ex)
             {
-                return NotFound();
+                ViewBag.Error += ex.Message;
             }
+            return RedirectToAction("Index");
+        }
+        // GET: SysAdminController/Details/5
+        public async Task<ActionResult> Details(int? id)
+        {
+            Organization? organization = new();
+            try
+            {
+                if (id == null || id == 0)
+                {
+                    return NotFound();
+                }
+                organization = await _context.Organizations.FindAsync(id);
 
+                if (organization == null)
+                {
+                    return NotFound();
+                }
+            }
+            catch (Exception ex)
+            {
+                ViewBag.Error += ex.Message;
+            }
             return View(organization);
         }
         //POST
-        [HttpPost, ActionName("Delete")]
+        [HttpPost, ActionName("Disable")]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeletePOST(int? id)
+        public async Task<IActionResult> DisablePOST(int? id)
         {
-            var obj = _context.Organizations.Find(id);
-            if (obj == null)
+            try
             {
-                return NotFound();
+                var obj = _context.Organizations.Find(id);
+                if (obj == null)
+                {
+                    return NotFound();
+                }
+                obj.IsActive = false;
+                _context.Organizations.Update(obj);
+                await _context.SaveChangesAsync();
+                ViewBag.Success = "Organization Diabled deleted successfully";
             }
-
-            _context.Organizations.Remove(obj);
-            await _context.SaveChangesAsync();
-            ViewBag.Success = "Category deleted successfully";
+            catch (Exception ex)
+            {
+                ViewBag.Error += ex.Message;
+            }
             return RedirectToAction("Index");
         }
 
         // GET: SysAdminController/Create
-        public ActionResult Create()
+        public async Task<ActionResult> Create()
         {
-            ViewBag.UserList = _authContext.Users.ToList();
+            try
+            {
+                ViewBag.UserList = await _authContext.Users.ToListAsync();
+            }
+            catch (Exception ex)
+            {
+                ViewBag.Error += ex.Message;
+            }
             return View();
         }
 
@@ -75,8 +125,8 @@ namespace SMS_Marketing.Controllers
             {
                 if (ModelState.IsValid)
                 {
-                    string OrganizationName = collection["Name"];
-                    string ManagerId = collection["ManagerId"];
+                    string? OrganizationName = collection["Name"];
+                    string? ManagerId = collection["ManagerId"];
                     if (OrganizationName == null || ManagerId == null) ViewBag.Error = "We could not create the organization. Please try again.";
                     Organization organization = new();
                     organization.IsActive = true;
@@ -88,13 +138,13 @@ namespace SMS_Marketing.Controllers
                     var PostedOganization = _context.Organizations.Add(organization);
                     await _context.SaveChangesAsync();
                 }
-                //Redirect to Error Page
-                return RedirectToAction(nameof(Index));
+                throw new Exception("There was a problem with the form. Please try again later.");
             }
-            catch
+            catch (Exception ex)
             {
-                return View();
+                ViewBag.Error += ex.Message;
             }
+            return View("Index");
         }
 
         // GET: SysAdminController/Edit/5
@@ -123,7 +173,7 @@ namespace SMS_Marketing.Controllers
             {
                 if (ModelState.IsValid)
                 {
-                    Organization organization = new();
+                    Organization? organization = new();
                     if (id != null)
                     {
                         organization = await _context.Organizations.FindAsync(id);
@@ -156,26 +206,65 @@ namespace SMS_Marketing.Controllers
                 return View();
             }
         }
-
-        //// GET: SysAdminController/Delete/5
-        //public ActionResult Delete(int id)
-        //{
-        //	return View();
-        //}
-
-        //// POST: SysAdminController/Delete/5
-        //[HttpPost]
-        //[ValidateAntiForgeryToken]
-        //public ActionResult Delete(int id, IFormCollection collection)
-        //{
-        //	try
-        //	{
-        //		return RedirectToAction(nameof(Index));
-        //	}
-        //	catch
-        //	{
-        //		return View();
-        //	}
-        //}
+        //GET : SysAdminController/Settings/Id
+        public async Task<ActionResult> Settings(string? id)
+        {
+            try
+            {
+                if (id == null) id = "TWITTER";
+                if (id != null)
+                {
+                    ViewBag.SettingsKey = id.ToUpper();
+                    List<AppSettings> appSettings = new List<AppSettings>();
+                    appSettings = (List<AppSettings>)(from e in _context.AppSettings
+                                                      where e.SettingGroup == id.ToUpper()
+                                                      select e).ToList();
+                    if (appSettings == null || appSettings.Count < 1) throw new Exception("Failed to initialize App Settings.");
+                    View(appSettings);
+                }
+                else
+                {
+                    throw new Exception("Invalid Route");
+                }
+            }
+            catch (Exception ex)
+            {
+                ViewBag.ErrorMessage += ex.Message;
+            }
+            return View();
+        }
+        //POST: SysAdmin/PostSettings
+        public async Task<ActionResult> PostSettings(string? setting, int? index)
+        {
+            try
+            {
+                if (setting != null && index != null)
+                {
+                    var currentSetting = (from e in _context.AppSettings
+                                          where e.Index == index
+                                          select e).FirstOrDefault();
+                    if (currentSetting != null)
+                    {
+                        currentSetting.Value = setting;
+                        _context.Update(currentSetting);
+                        await _context.SaveChangesAsync();
+                        ViewBag.Success = "Settings Updated";
+                    }
+                    else
+                    {
+                        throw new Exception("We failed to update the setting. Please try again.");
+                    }
+                }
+                else
+                {
+                    throw new Exception("Invalid form. Please try again.");
+                }
+            }
+            catch (Exception ex)
+            {
+                ViewBag.ErrorMessage += ex.Message;
+            }
+            return RedirectToAction("Settings");
+        }
     }
 }

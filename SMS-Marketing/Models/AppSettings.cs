@@ -14,6 +14,9 @@ namespace SMS_Marketing.Models
         [Required]
         [DataType(DataType.Text)]
         public string Value { get; set; } = string.Empty;
+        [Required]
+        [DataType(DataType.Text)]
+        public string SettingGroup { get; set; } = string.Empty;
     }
     static public class AppSettingsAccess
     {

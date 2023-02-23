@@ -1,0 +1,19 @@
+﻿@model List<AppSettings>
+
+@{
+    foreach (var item in Model)
+    {
+        <form asp-action="PostSettings" asp-controller="SysAdmin">
+            <div>
+                <input name="index" value="@item.Index" hidden />
+                <input value="@item.SettingGroup" hidden />
+            </div>
+            <div class="input-group">
+                <label for="@item.Name.ToString()" class="form-label">@item.Name</label>
+                <input name="setting" type="text" class="form-control" asp-asp-for="@item.Name.ToString()" value="@item.Value" />
+            </div>
+            <input type="submit" class="btn btn-primary" value="Save"/>
+        </form>
+    }
+}
+

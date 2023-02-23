@@ -1,0 +1,26 @@
+﻿@model List<AppSettings>
+
+<section class="container">
+    <ul class="nav nav-tabs">
+        <li class="nav-item">
+            <a class="nav-link" href="#">Organizations</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" href="#">Insights</a>
+        </li>  <li class="nav-item">
+            <a class="nav-link active" aria-current="page" href="/SysAdmin/Settings/Twitter">Settings</a>
+        </li>        
+    </ul>
+</section>
+
+<section class="container">
+    <div class="row">
+        <div class="col-3">
+            <partial name="_SettingsMenu"/>
+        </div>
+        <div class="col-auto">
+            <partial name="../SysAdmin/AdminSettings/_Twitter.cshtml" for="@Model"/>
+            @*@Html.Partial("../SysAdmin/AdminSettings/_Twitter.cshtml")*@
+        </div>
+    </div>
+</section>
