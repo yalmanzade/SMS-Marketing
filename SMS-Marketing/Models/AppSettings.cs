@@ -22,5 +22,8 @@ namespace SMS_Marketing.Models
     {
         static public int TwitterKey { get; set; } = 0;
         static public int TwitterSecret { get; set; } = 1;
+        static public int AllowImages { get; set; } = 2;
+        static public int FacebookAccessToken { get; set; } = 3;
+        static public int FacebookAppId { get; set; } = 4;
     }
 }

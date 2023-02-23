@@ -11,6 +11,7 @@ namespace SMS_Marketing.Data
         {
         }
         public DbSet<TwitterAuth> TwitterAuth { get; set; } = default!;
+        public DbSet<FacebookAuth> FacebookAuth { get; set; } = default!;
         public DbSet<AppSettings> AppSettings { get; set; } = default!;
         public DbSet<Organization> Organizations { get; set; } = default!;
     }

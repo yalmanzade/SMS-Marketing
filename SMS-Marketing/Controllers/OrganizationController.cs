@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using SMS_Marketing.Areas.Identity.Data;
 using SMS_Marketing.Data;
 using SMS_Marketing.Models;
+using System.Text;
 
 namespace SMS_Marketing.Controllers
 {
@@ -105,8 +106,9 @@ namespace SMS_Marketing.Controllers
                     auth.CredentialStore = await GetCredentialStore(id);
                 }
                 TwitterContext twitterContext = new(auth);
-                if (twitterContext != null && postPicture != null)
+                if (twitterContext != null && postPicture != null && postText != null)
                 {
+                    bool facebookSuccess = await PostToFacebookImage(postText, postPicture, id);
                     string mediaCategory = "tweet_image";
                     var fileStream = postPicture.OpenReadStream();
                     byte[] bytes = new byte[fileStream.Length];
@@ -133,13 +135,6 @@ namespace SMS_Marketing.Controllers
                     {
                         throw new Exception("We could not post your message to Twitter.");
                     }
-                    //MediaViewModel tweetViewModel = new()
-                    //{
-                    //    MediaUrl = tweet.Entities.Urls.FirstOrDefault()?.Url,
-                    //    Description = tweet.Entities.Urls.FirstOrDefault()?.Description,
-                    //    Text = tweet.Text
-                    //};
-                    //return View(tweetViewModel);
                 }
                 if (twitterContext != null && postText != null && postText.Length > 0 && postText.Length < 280)
                 {
@@ -202,7 +197,83 @@ namespace SMS_Marketing.Controllers
             }
             return credentialStore;
         }
+        private async Task<bool> PostToFacebookImage(string message, IFormFile imageFile, int? id)
+        {
+            try
+            {
+                FacebookAuth? facebookAuth = _context.FacebookAuth
+                                               .Where(x => x.OrganizationId == id)
+                                               .FirstOrDefault();
 
+                if (facebookAuth.AccessToken == null || facebookAuth.AppId == null) return false;
+                string accessToken = facebookAuth.AccessToken;
+                string pageId = facebookAuth.AppId;
+                //string accessToken = _context.AppSettings.First(p => p.Index == AppSettingsAccess.FacebookAccessToken).Value;
+                //string pageId = _context.AppSettings.First(p => p.Index == AppSettingsAccess.FacebookAppId).Value;
+                var url = $"https://graph.facebook.com/{pageId}/feed?access_token={accessToken}";
+
+                if (imageFile == null)
+                {
+                    var data = $"message={message}";
+                    var dataBytes = Encoding.UTF8.GetBytes(data);
+
+                    using (var client = new HttpClient())
+                    {
+                        var response = await client.PostAsync(url, new ByteArrayContent(dataBytes));
+
+                        if (response.IsSuccessStatusCode)
+                        {
+                            TempData["Result"] = "Post was successful.";
+                            return true;
+                        }
+                        else
+                        {
+                            TempData["Result"] = "Post was unsuccessful.";
+                            return false;
+                        }
+                    }
+                }
+                else
+                {
+                    url = $"https://graph.facebook.com/{pageId}/photos?access_token={accessToken}";
+
+                    using (var client = new HttpClient())
+                    {
+                        using (var content = new MultipartFormDataContent())
+                        {
+                            content.Add(new StringContent(message), "message");
+
+                            using (var stream = new MemoryStream())
+                            {
+                                await imageFile.CopyToAsync(stream);
+                                content.Add(new ByteArrayContent(stream.ToArray()), "source", imageFile.FileName);
+                            }
+
+                            var response = await client.PostAsync(url, content);
+
+                            if (response.IsSuccessStatusCode)
+                            {
+                                TempData["Result"] = "Post was successful.";
+                                return true;
+                            }
+                            else
+                            {
+                                TempData["Result"] = "Post was unsuccessful.";
+                                return false;
+                            }
+                        }
+                    }
+                }
+
+            }
+            catch (Exception ex)
+            {
+                Error.InitializeError("Fa", "100", ex.Message);
+                Error.LogError();
+                return false;
+            }
+            return false;
+        }
         // GET: OrganizationController/UserManagement/5
         public async Task<ActionResult> UserManagement(int id)
         {
