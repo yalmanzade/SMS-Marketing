@@ -1,0 +1,32 @@
+﻿@{
+    ViewData["Title"] = "Send";
+}
+<h1>@ViewData["Title"]</h1>
+<form method="post">
+    <div>
+        <label for="accountSid">Account SID:</label>
+        <input type="text" id="accountSid" name="accountSid" />
+    </div>
+    <div>
+        <label for="authToken">Auth Token:</label>
+        <input type="text" id="authToken" name="authToken" />
+    </div>
+    <div>
+        <label for="fromNumber">Sending Number:</label>
+        <input type="text" id="fromNumber" name="fromNumber" />
+    </div>
+    <div>
+        <label for="toNumber1">first number:</label>
+        <input type="text" id="toNumber1" name="toNumber1" />
+    </div>
+    <div>
+        <label for="url:">Image:</label>
+        <input type="text" id="url" name="url" />
+    </div>
+    <div>
+        <label for="body">Message:</label>
+        <input type="text" id="body" name="body" />
+    </div>
+    <button type="submit">Send</button>
+    <div>@TempData["Result"]</div>
+</form>
