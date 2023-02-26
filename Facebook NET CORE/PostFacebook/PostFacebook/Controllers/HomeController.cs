@@ -3,9 +3,19 @@ using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json;
 
 namespace PostFacebook.Controllers
 {
+    public class FacebookError
+    {
+        public FacebookErrorData Error { get; set; }
+    }
+
+    public class FacebookErrorData
+    {
+        public string Message { get; set; }
+    }
     public class HomeController : Controller
     {
         public IActionResult Index()
@@ -32,7 +42,9 @@ namespace PostFacebook.Controllers
                     }
                     else
                     {
-                        TempData["Result"] = "Post was unsuccessful.";
+                        var responseContent = await response.Content.ReadAsStringAsync();
+                        var error = JsonConvert.DeserializeObject<FacebookError>(responseContent);
+                        TempData["Result"] = $"Post was unsuccessful. Reason: {error.Error.Message}.";
                     }
                 }
             }
@@ -60,7 +72,9 @@ namespace PostFacebook.Controllers
                         }
                         else
                         {
-                            TempData["Result"] = "Post was unsuccessful.";
+                            var responseContent = await response.Content.ReadAsStringAsync();
+                            var error = JsonConvert.DeserializeObject<FacebookError>(responseContent);
+                            TempData["Result"] = $"Post was unsuccessful. Reason: {error.Error.Message}.";
                         }
                     }
                 }
