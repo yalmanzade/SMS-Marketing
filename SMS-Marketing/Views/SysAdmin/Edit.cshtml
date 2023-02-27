@@ -32,9 +32,9 @@
         }
         <div class="row">
             <div class="col">
-                <div class="card" style="width: 18rem;">
+                <div class="card" style="width: 25rem;">
                     <div class="card-body">
-                        <h5 class="card-title">Add an Organization</h5>
+                        <h5 class="card-title">Edit Organization</h5>
                         <h6 class="card-subtitle mb-2 text-muted">Use the form below</h6>
                         <div class="card-body">
                             <form method="post">
@@ -67,6 +67,11 @@
                                         <option value="True">Active</option>
                                     </select>
                                     <label for="floatingInput">Status</label>
+                                </div>
+                                <div class="form-floating mb-3">
+                                    <input type="text" class="form-control" placeholder="Org. Twilio Phone Number" asp-for="TwilioPhoneNumber">
+                                    <label for="floatingInput">Phone Number</label>
+                                    <span>Make sure you include +1 for US and Canada phone numbers.</span>
                                 </div>
                                 <div class="input-group">
                                     <button type="submit" class="btn btn-primary mb-3">Edit Organization</button>

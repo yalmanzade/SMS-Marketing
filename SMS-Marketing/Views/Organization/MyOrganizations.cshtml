@@ -2,12 +2,7 @@
     if (ViewBag.OrganizationList !=null)
     {
         List<Organization> organizations = ViewBag.OrganizationList;
-        if (organizations.Count == 1)
-        {
-            Organization? organization = organizations.FirstOrDefault();
-
-        }
-        else if (organizations.Count == 0)
+        if (organizations.Count == 0)
         {
             <p>There are no Organizations.</p>
         }

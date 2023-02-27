@@ -102,11 +102,11 @@ namespace SMS_Marketing.Controllers
         }
 
         // GET: SysAdminController/Create
-        public async Task<ActionResult> Create()
+        public ActionResult Create()
         {
             try
             {
-                ViewBag.UserList = await _authContext.Users.ToListAsync();
+                ViewBag.UserList = _authContext.Users.ToList();
             }
             catch (Exception ex)
             {
@@ -185,24 +185,35 @@ namespace SMS_Marketing.Controllers
                     }
                     string OrganizationName = collection["Name"];
                     string ManagerId = collection["ManagerId"];
-                    if (OrganizationName == null || ManagerId == null) ViewBag.Error = "We could not create the organization. Please try again.";
+                    if (OrganizationName == null || ManagerId == null) throw new Exception("We could not create the organization. Please try again.");
                     if (collection["IsActive"] == "True") organization.IsActive = true;
                     if (collection["IsActive"] != "True") organization.IsActive = false;
                     organization.Name = OrganizationName;
                     organization.ManagerId = ManagerId;
                     var OrgUser = _authContext.Users.Find(ManagerId);
-                    if (OrgUser == null) ViewBag.Error = "We could not create the organization. Please try again.";
+                    if (OrgUser == null) throw new Exception("We could not create the organization. Please try again.");
                     organization.ManagerName = $"{OrgUser.FirstName} {OrgUser.LastName}";
+                    //Update Twilio Information
+                    string twilioNumber = collection["TwilioPhoneNumber"];
+                    if (twilioNumber == null || twilioNumber.Length < 10)
+                    {
+                        organization.IsSMS = false;
+                        _context.Update(organization);
+                        await _context.SaveChangesAsync();
+                        throw new ArgumentNullException("Invalid Phone Number Entered. Twilio Disabled");
+                    }
+                    organization.TwilioPhoneNumber = twilioNumber;
+                    organization.IsSMS = true;
                     _context.Organizations.Update(organization);
                     await _context.SaveChangesAsync();
                     ViewBag.Success = "Organization updated successfully.";
                     return RedirectToAction("Index");
                 }
-                ViewBag.Error = "There was a problem with the form.";
-                return RedirectToAction(nameof(Index));
+                throw new Exception("There was an unknown issue. Please try again.");
             }
-            catch
+            catch (Exception ex)
             {
+                ViewBag.ErrorMessage += ex.Message;
                 return View();
             }
         }

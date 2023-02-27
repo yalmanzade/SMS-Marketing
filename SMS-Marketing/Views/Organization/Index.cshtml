@@ -28,10 +28,13 @@
             <a class="nav-link" href="/Organization/UserManagement/@Model.Id">User Management</a>
         </li>
         <li class="nav-item">
-            <a class="nav-link" href="#">Customer</a>
+            <a class="nav-link" asp-action="Customers" asp-controller="Organization" asp-route-id="@Model.Id">Customers</a>
         </li>
         <li class="nav-item">
-            <a class="nav-link" href="#">Insight</a>
+            <a class="nav-link" asp-action="Groups" asp-controller="Organization" asp-route-id="@Model.Id">Groups</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" asp-action="Insights" asp-controller="Organization" asp-route-id="@Model.Id">Insights</a>
         </li>
     </ul>
 </section>

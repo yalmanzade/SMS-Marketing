@@ -1,9 +1,11 @@
 ﻿@model List<AppSettings>
-
+@{
+    ViewData["Title"] = "Settings";
+}
 <section class="container">
     <ul class="nav nav-tabs">
         <li class="nav-item">
-            <a class="nav-link" href="#">Organizations</a>
+            <a class="nav-link" asp-action="Index" asp-controller="SysAdmin">Organizations</a>
         </li>
         <li class="nav-item">
             <a class="nav-link" href="#">Insights</a>
@@ -12,14 +14,13 @@
         </li>        
     </ul>
 </section>
-
-<section class="container">
+<section class="container mt-4 mb-5">
     <div class="row">
         <div class="col-3">
-            <partial name="_SettingsMenu"/>
+            <partial name="../SysAdmin/AdminSettings/_SettingsMenu" />
         </div>
-        <div class="col-auto">
-            <partial name="../SysAdmin/AdminSettings/_Twitter.cshtml" for="@Model"/>
+        <div class="col-8">
+            <partial name="../SysAdmin/AdminSettings/_SettingsForm.cshtml" for="@Model"/>
             @*@Html.Partial("../SysAdmin/AdminSettings/_Twitter.cshtml")*@
         </div>
     </div>

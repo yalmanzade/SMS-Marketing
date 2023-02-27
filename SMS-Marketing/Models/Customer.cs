@@ -2,7 +2,7 @@
 
 namespace SMS_Marketing.Models
 {
-    public class Costumer
+    public class Customer
     {
         [Key]
         public int Id { get; set; }
@@ -12,7 +12,7 @@ namespace SMS_Marketing.Models
         public int GroupId { get; set; }
         [DataType(DataType.Text)]
         [StringLength(20)]
-        public int GroupName { get; set; }
+        public string GroupName { get; set; } = string.Empty;
         [DataType(DataType.Text)]
         [StringLength(20)]
         public string Name { get; set; } = string.Empty;
