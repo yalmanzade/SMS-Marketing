@@ -1,8 +1,55 @@
-﻿@{
-    ViewData["Title"] = "Home Page";
+﻿@using Microsoft.AspNetCore.Identity
+@inject SignInManager<AppUser> SignInManager
+@inject UserManager<AppUser> UserManager
+@{
+    ViewData["Title"] = "Home";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <a class="nav-link text-dark" asp-area="" asp-controller="Twitter" asp-action="Login">Use Twitter</a>
-</div>
+<section class="container mt-4">
+    @{
+    if (SignInManager.IsSignedIn(User))
+    {
+        AppUser? user = await UserManager.GetUserAsync(User);
+        if (user != null)
+        {
+            string fullName = $"{user.FirstName} {user.LastName}";
+            <div class="text-center">
+                <h1 class="display-4">Welcome Back, @fullName</h1>
+            </div>
+        }
+        else
+        {
+            <div class="text-center">
+                <h1 class="display-4">Welcome Back!</h1>
+            </div>
+        }
+    }
+}
+</section>
+<section class="container mt-4">
+    <div class="row">
+        <div class="col-sm-6">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Manage your organization</h5>
+                    <p class="card-text">With supporting text below as a natural lead-in to additional content.</p>
+                    <a asp-action="MyOrganizations" asp-controller="Organization" class="btn btn-primary">
+                        <i class="fa-solid fa-list-check"></i>
+                        Manage Organization
+                    </a>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-6">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Manage your account</h5>
+                    <p class="card-text">Reset your password, manage your email and download your data.</p>
+                    <a asp-area="Identity" asp-page="/Account/Manage/Index" class="btn btn-primary">
+                        <i class="fa-regular fa-user"></i>
+                        Account</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>

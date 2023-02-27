@@ -1,60 +1,196 @@
 ﻿using LinqToTwitter;
 using Microsoft.AspNetCore.Http.Extensions;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using SMS_Marketing.Areas.Identity.Data;
+using SMS_Marketing.Data;
 using SMS_Marketing.Models;
 
 namespace SMS_Marketing.Controllers
 {
     public class TwitterController : Controller
     {
+        private readonly ApplicationDbContext _context;
+        private readonly UserAuthDbContext _authContext;
+        private readonly UserManager<AppUser> _userManager;
+        private readonly SignInManager<AppUser> _signInManager;
+
+        public TwitterController(ApplicationDbContext context, UserAuthDbContext authDbContext,
+                                         UserManager<AppUser> userManager, SignInManager<AppUser> signInManager)
+        {
+            _userManager = userManager;
+            _signInManager = signInManager;
+            _context = context;
+            _authContext = authDbContext;
+        }
         // GET: TwitterController
         public ActionResult Index()
         {
             return View();
         }
-        //GET: TwitterController/Details/5
-        public async Task<ActionResult> Login()
+        //POST: TwitterController/Login/
+        [ActionName("Login")]
+        public async Task<ActionResult> Login(int? id)
+        {
+            try
+            {
+                if (id != null)
+                {
+                    //var twitterAuth = await _context.TwitterAuth.FindAsync(id);
+                    var twitterAuth = _context.TwitterAuth
+                                   .Where(i => i.OrganizationId == id)
+                                   .FirstOrDefault();
+                    if (twitterAuth == null)
+                    {
+                        //await auth.CredentialStore.ClearAsync();
+                        var auth = new MvcAuthorizer
+                        {
+                            CredentialStore = new SessionStateCredentialStore(HttpContext.Session)
+                            {
+                                //ConsumerKey = twitterConfiguration.GetValue<string>("Twitter:Key"),
+                                //ConsumerSecret = twitterConfiguration.GetValue<string>("Twitter:Secret")
+                                ConsumerKey = _context.AppSettings.First(p => p.Index == AppSettingsAccess.TwitterKey).Value,
+                                ConsumerSecret = _context.AppSettings.First(p => p.Index == AppSettingsAccess.TwitterSecret).Value
+                            }
+                        };
+                        //string twitterCallbackUrl = Request.GetDisplayUrl().Replace("Login", "CompleteLogin");
+                        TempData["CurrentOrg"] = id;
+                        string twitterCallbackUrl = "https://localhost:7076/Twitter/CompleteLogin/";
+                        return await auth.BeginAuthorizationAsync(new Uri(twitterCallbackUrl));
+                    };
+                    if (twitterAuth.AccessToken != null && twitterAuth.OAuthToken != null)
+                    {
+                        var consumerKey = _context.AppSettings.First(p => p.Index == AppSettingsAccess.TwitterKey).Value;
+                        var consumerSecret = _context.AppSettings.First(p => p.Index == AppSettingsAccess.TwitterSecret).Value;
+                        var auth = new MvcAuthorizer
+                        {
+                            CredentialStore = new SessionStateCredentialStore(HttpContext.Session)
+                            {
+                                OAuthToken = twitterAuth.OAuthToken,
+                                OAuthTokenSecret = twitterAuth.AccessToken,
+                                ConsumerKey = consumerKey,
+                                ConsumerSecret = consumerSecret
+                            }
+                        };
+                        //await SaveTwitterOrgChanges((int)id);
+                        return RedirectToAction("Index", "Organization", new { @id = id });
+                    }
+
+                }
+                else
+                {
+                    throw new Exception("Invalid Organization Id");
+                }
+            }
+            catch (Exception ex)
+            {
+                ViewBag.Error = ex.Message;
+                return View();
+            }
+            ViewBag.Error = "There has been an unidentified error";
+            return View("Index");
+        }
+
+        private async Task<ActionResult> SaveTwitterOrgChanges(int organizationId)
+        {
+            try
+            {
+                Organization organization = await _context.Organizations.FindAsync(organizationId);
+                if (organization != null)
+                {
+                    _context.Organizations.Update(organization);
+                    await _context.SaveChangesAsync();
+                }
+                else
+                {
+                    throw new Exception("Could not update your organization.");
+                }
+            }
+            catch (Exception ex)
+            {
+                ViewBag.Error = ex.Message;
+                return RedirectToAction("Organization/" + organizationId);
+            }
+            return RedirectToAction("Organization/" + organizationId);
+        }
+
+        private async Task<ActionResult> AuthorizeUser()
         {
             var auth = new MvcAuthorizer
             {
                 CredentialStore = new SessionStateCredentialStore(HttpContext.Session)
                 {
-                    ConsumerKey = "",
-                    ConsumerSecret = ""
+                    //ConsumerKey = twitterConfiguration.GetValue<string>("Twitter:Key"),
+                    //ConsumerSecret = twitterConfiguration.GetValue<string>("Twitter:Secret")
+                    ConsumerKey = _context.AppSettings.First(p => p.Index == AppSettingsAccess.TwitterKey).Value,
+                    ConsumerSecret = _context.AppSettings.First(p => p.Index == AppSettingsAccess.TwitterSecret).Value
                 }
             };
             //await auth.CredentialStore.ClearAsync();
             string twitterCallbackUrl = Request.GetDisplayUrl().Replace("Login", "CompleteLogin");
             return await auth.BeginAuthorizationAsync(new Uri(twitterCallbackUrl));
-            //return View();
         }
         //GET: TwitterController/Details/5
+        [ActionName("CompleteLogin")]
         public async Task<ActionResult> CompleteLogin()
         {
-            var auth = new MvcAuthorizer
+            int? id = (int)TempData.Peek("CurrentOrg");
+            try
             {
-                CredentialStore = new SessionStateCredentialStore(HttpContext.Session)
-            };
+                if (id != null && id > 0)
+                {
+                    var auth = new MvcAuthorizer
+                    {
+                        CredentialStore = new SessionStateCredentialStore(HttpContext.Session)
+                    };
+                    await auth.CompleteAuthorizeAsync(new Uri(Request.GetDisplayUrl()));
+                    var credentials = auth.CredentialStore;
 
-            await auth.CompleteAuthorizeAsync(new Uri(Request.GetDisplayUrl()));
+                    TwitterAuth twitterAuth = new();
+                    //twitterAuth.OrganizationId = (int)organizationId;
+                    _ = id != null ? twitterAuth.OrganizationId = (int)id : throw new ArgumentException();
+                    _ = credentials.ScreenName != null ? twitterAuth.UserScreenName = credentials.ScreenName : throw new ArgumentException();
+                    _ = credentials.OAuthToken != null ? twitterAuth.OAuthToken = credentials.OAuthToken : throw new ArgumentException();
+                    _ = credentials.OAuthTokenSecret != null ? twitterAuth.AccessToken = credentials.OAuthTokenSecret : throw new ArgumentException();
+                    _ = credentials.UserID.ToString() != null ? twitterAuth.TwitterId = credentials.UserID.ToString() : throw new ArgumentException();
 
-            // This is how you access credentials after authorization.
-            // The oauthToken and oauthTokenSecret do not expire.
-            // You can use the userID to associate the credentials with the user.
-            // You can save credentials any way you want - database, 
-            //   isolated storage, etc. - it's up to you.
-            // You can retrieve and load all 4 credentials on subsequent 
-            //   queries to avoid the need to re-authorize.
-            // When you've loaded all 4 credentials, LINQ to Twitter will let 
-            //   you make queries without re-authorizing.
-            //
-            var credentials = auth.CredentialStore;
-            string oauthtoken = credentials.OAuthToken;
-            string oauthtokensecret = credentials.OAuthTokenSecret;
-            string screenname = credentials.ScreenName;
-            ulong userid = credentials.UserID;
+                    await _context.TwitterAuth.AddAsync(twitterAuth);
+                    await AddTwitterToOrganization((int)id);
+                    await _context.SaveChangesAsync();
+                    //twitterAuth.TwitterId = credentials.UserID.ToString();
+
+                    //string oauthtoken = credentials.OAuthToken;
+                    //string oauthtokensecret = credentials.OAuthTokenSecret;
+                    //string screenname = credentials.ScreenName;
+                    //ulong userid = credentials.UserID;
+                }
+                ViewBag.Success = "Saved Twitter Credentials";
+            }
+            catch (Exception ex)
+            {
+                ViewBag.ErrorMessage = ex.Message;
+            }
             return View();
         }
+
+        private async Task<Organization> AddTwitterToOrganization(int id)
+        {
+            Organization organization = new();
+            try
+            {
+                organization = _context.Organizations
+                                .Where(i => i.Id == id)
+                                .FirstOrDefault() ?? throw new ArgumentException();
+                organization.IsTwitter = true;
+                _context.Organizations.Update(organization);
+            }
+            catch (Exception ex)
+            {
+                ViewBag.Error = ex.Message;
+            }
+            return organization;
+        }
+
         //POST TwitterController/Twitter/CompleteLogin
         [HttpPost]
         [ActionName("Create-Tweet")]

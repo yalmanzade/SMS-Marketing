@@ -6,7 +6,14 @@
 <h1>Login Complete</h1>
 <div>
     <form id="formTemplate" method="post" action="Create-Tweet">
-        <input name="userPost" id="userPost" type="text" />
+        <div class="form-group">
+            <label for="userPort" class="form-label"></label>
+            <input name="userPost" id="userPost" type="text" />
+        </div>
+        <div class="form-group">
+            <label for="formFileLg" class="form-label">Add an Image</label>
+            <input class="form-control form-control-lg" id="formFileLg" type="file">
+        </div>
         <input type="submit" />
     </form>
 </div>

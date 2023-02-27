@@ -10,15 +10,19 @@ namespace SMS_Marketing.Models
         [Required]
         [DisplayName("Organization ID")]
         public int OrganizationId { get; set; }
+        //[Required]
+        //[DataType(DataType.Text)]
+        //public string ConsumerKey { get; set; } = string.Empty;
+        //[Required]
+        //[DataType(DataType.Text)]
+        //public string ConsumerSecret { get; set; } = string.Empty;
         [Required]
         [DataType(DataType.Text)]
-        public string ConsumerKey { get; set; } = string.Empty;
-        [Required]
-        [DataType(DataType.Text)]
-        public string ConsumerSecret { get; set; } = string.Empty;
+        public string UserScreenName { get; set; } = string.Empty;
         [Required]
         [DataType(DataType.Text)]
         public string OAuthToken { get; set; } = string.Empty;
+        //AKA Token Secret
         [Required]
         [DataType(DataType.Text)]
         public string AccessToken { get; set; } = string.Empty;

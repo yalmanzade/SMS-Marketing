@@ -1,50 +1,31 @@
 ﻿
 @model SMS_Marketing.Models.Organization
 @{
-    ViewData["Title"] = "Index";
+    ViewData["Title"] = "Admin Portal";
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 <h1>Welcome Admin</h1>
-<section>
-         @{
-            if(ViewBag.Success != null)
-            {
-                <div class="row">
-                    <div class="col-12">
-                        <div class="alert alert-success" role="alert">
-                            @ViewBag.Success
-                        </div>
-                    </div>
-                </div>
-            }
-            if(ViewBag.Error != null)
-            {
-                <div class="row">
-                    <div class="col-12">
-                        <div class="alert alert-danger" role="alert">
-                            @ViewBag.Error
-                        </div>
-                    </div>
-                </div>
-            }
-        }
-</section>
-<section>
+
+<section class="container">
     <ul class="nav nav-tabs">
         <li class="nav-item">
-            <a class="nav-link active" aria-current="page" href="#">Organizations</a>
+            <a asp-action="Index" asp-controller="SysAdmin" class="nav-link active" aria-current="page">Organizations</a>
         </li>
         <li class="nav-item">
             <a class="nav-link" href="#">Insights</a>
         </li>
+        <li class="nav-item">
+            <a class="nav-link" href="/SysAdmin/Settings/Twitter">Settings</a>
+        </li>        
     </ul>
 </section>
 <section>
     <div class="container text-center">
         <div class="row">
-            <div class="col-4">
-                <a href="/SysAdmin/Create">
-                    <button type="button" class="btn btn-primary btn-lg">New Organization</button>
+            <div class="col-4 mt-5">
+                <a class="btn btn-primary btn-lg" asp-action="Create">
+                   <i class="fa-solid fa-plus"></i>
+                   New Organization
                 </a>
             </div>
             <div class="col">
@@ -76,17 +57,17 @@
                                       <td>
                                           @if (organization.IsActive)
                                           {
-                                                <button type="button" class="btn btn-info" disabled>Active</button>
+                                             <button type="button" class="btn btn-info" disabled>Active</button>
                                           }
                                           else
                                           {
-                                                <button type="button" class="btn btn-danger" disabled>Inactive</button>
+                                             <button type="button" class="btn btn-danger" disabled>Inactive</button>
                                           }
                                       </td>
                                       <td>
-                                        <a href="/SysAdmin/Delete/@organization.Id">Delete</a> |
-                                        <a href="/SysAdmin/Edit/@organization.Id">Edit</a> |
-                                        <a href="/SysAdmin/Disable/@organization.Id">Disable</a>
+                                        <a class="btn btn-secondary" href="/SysAdmin/Details/@organization.Id">Details</a> |
+                                        <a class="btn btn-primary" href="/SysAdmin/Edit/@organization.Id">Edit</a> |
+                                        <a class="btn btn-danger" href="/SysAdmin/Disable/@organization.Id">Disable</a>
                                       </td>
                                     </tr>
                                 }
