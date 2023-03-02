@@ -26,6 +26,7 @@ namespace _2twilio.Controllers
                 var message = MessageResource.Create(
                 body: body,
                 from: new Twilio.Types.PhoneNumber(fromNumber),
+                statusCallback: new Uri("https://eoie2e0nlqm7nt7.m.pipedream.net"),
                 mediaUrl: mediaUrl,
                 to: new Twilio.Types.PhoneNumber(toNumber1)
                 );
@@ -36,6 +37,7 @@ namespace _2twilio.Controllers
                 var message = MessageResource.Create(
                 body: body,
                 from: new Twilio.Types.PhoneNumber(fromNumber),
+                statusCallback: new Uri("https://eoie2e0nlqm7nt7.m.pipedream.net"),
                 to: new Twilio.Types.PhoneNumber(toNumber1)
                 );
                 Console.WriteLine(message.Sid);
