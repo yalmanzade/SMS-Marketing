@@ -22,6 +22,8 @@ public class Organization
     public bool IsFacebook { get; set; } = false;
     [NotMapped]
     public List<Group>? Groups { get; set; }
+    [NotMapped]
+    public List<AppUser>? AppUsers { get; set; }
 }
 public class CustomerViewModel
 {

@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using SMS_Marketing.Areas.Identity.Data;
 
@@ -11,9 +12,11 @@ using SMS_Marketing.Areas.Identity.Data;
 namespace SMSMarketing.Migrations
 {
     [DbContext(typeof(UserAuthDbContext))]
-    partial class UserAuthDbContextModelSnapshot : ModelSnapshot
+    [Migration("20230302235820_IdentityUserAzure")]
+    partial class IdentityUserAzure
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -178,34 +181,6 @@ namespace SMSMarketing.Migrations
                     b.Property<bool>("EmailConfirmed")
                         .HasColumnType("bit");
 
-                    b.Property<string>("FirstName")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
-                    b.Property<bool>("IsActive")
-                        .HasColumnType("bit");
-
-                    b.Property<bool>("IsCustomerManagment")
-                        .HasColumnType("bit");
-
-                    b.Property<bool>("IsInsight")
-                        .HasColumnType("bit");
-
-                    b.Property<bool>("IsPost")
-                        .HasColumnType("bit");
-
-                    b.Property<bool>("IsSystemManager")
-                        .HasColumnType("bit");
-
-                    b.Property<bool>("IsUserManagement")
-                        .HasColumnType("bit");
-
-                    b.Property<string>("LastName")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
                     b.Property<bool>("LockoutEnabled")
                         .HasColumnType("bit");
 
@@ -219,9 +194,6 @@ namespace SMSMarketing.Migrations
                     b.Property<string>("NormalizedUserName")
                         .HasMaxLength(256)
                         .HasColumnType("nvarchar(256)");
-
-                    b.Property<int>("OrganizationId")
-                        .HasColumnType("int");
 
                     b.Property<string>("PasswordHash")
                         .HasColumnType("nvarchar(max)");

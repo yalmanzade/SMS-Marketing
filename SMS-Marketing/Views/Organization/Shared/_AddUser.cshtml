@@ -1,0 +1,14 @@
+﻿<section class="container">
+    <form method="post" asp-action="AddUser" asp-controller="Organization" asp-route-id="@Model.Id">
+        <div class="mb-3">
+            <h1>Add an user.</h1>
+        </div>
+        <div class="mb-3">
+            <label for="email" class="form-label">Email address</label>
+            <input type="email" class="form-control" id="email" name="email" placeholder="name@example.com">
+        </div>
+        <div class="mb-3">
+            <input type="submit" value="Invite User" class="btn btn-primary"/>
+        </div>
+    </form>
+</section>

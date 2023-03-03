@@ -1,0 +1,21 @@
+﻿@model Organization
+<section class="container">
+    <div class="mb-3">
+            <h1>Edit User Access.</h1>
+    </div>
+    <form asp-action="EditUser" asp-controller="Organization" asp-route-id="@Model.Id">
+        <div class="mb-3">
+            <select class="form-select" aria-label="Select a user">
+                @{
+                    foreach (var item in Model.AppUsers)
+                    {
+                        <option value="@item.Id">@item.FirstName @item.LastName</option>
+                    }
+                }
+            </select>
+        </div>
+        <div class="mb-3">
+            <input class="btn btn-secondary" type="submit" value="Edit" />
+        </div>
+    </form>
+</section>

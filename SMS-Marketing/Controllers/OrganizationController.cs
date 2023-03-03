@@ -37,7 +37,7 @@ namespace SMS_Marketing.Controllers
             }
             catch (Exception ex)
             {
-                ViewBag.Error += ex.Message;
+                TempData["Error"] += ex.Message;
                 return RedirectToAction("Index", "Error");
             }
             return View(organization);
@@ -54,7 +54,7 @@ namespace SMS_Marketing.Controllers
                              .Where(g => g.OrganizationId == id)
                              .ToList();
                     //if (groups != null) ViewData["CurrentOrg"] = groups;
-                    ViewBag.Success += "Groups Retrieved";
+                    TempData["Success"] += "Groups Retrieved";
                     if (groups != null) return groups;
                 }
                 if (groups == null)
@@ -64,8 +64,36 @@ namespace SMS_Marketing.Controllers
             }
             catch (Exception ex)
             {
-                ViewBag.Error += ex.Message;
+                TempData["Error"] += ex.Message;
                 RedirectToAction("Index", "Error");
+            }
+            return null;
+        }
+
+        private async Task<List<AppUser>> GetCurrentUsers(int? id)
+        {
+            List<AppUser> appUsers = new();
+            try
+            {
+                //appUsers = _context.Users
+                //    .Join(
+                //        _context.Authorization,
+                //        user => user.Id,
+                //        auth => auth.UserId,
+                //        (user, auth) => new
+                //        {
+
+                //        } 
+                //    ).Tolist();
+                appUsers = _authContext.Users
+                            .Where(u => u.OrganizationId == id)
+                            .ToList();
+                if (appUsers == null) throw new Exception("We could not retrieve the user list for your organization.");
+                return appUsers;
+            }
+            catch (Exception ex)
+            {
+                TempData["Error"] += ex.Message;
             }
             return null;
         }
@@ -79,7 +107,7 @@ namespace SMS_Marketing.Controllers
                 {
                     organization = await _context.Organizations.FindAsync(id);
                     if (organization != null) ViewData["CurrentOrg"] = organization;
-                    ViewBag.Success += "Organization Retrieved";
+                    TempData["Success"] += "Organization Retrieved";
                     if (organization != null) return organization;
                 }
                 if (organization == null)
@@ -90,8 +118,26 @@ namespace SMS_Marketing.Controllers
             }
             catch (Exception ex)
             {
-                ViewBag.Error += ex.Message;
+                TempData["Error"] += ex.Message;
                 RedirectToAction("Index", "Error");
+            }
+            return null;
+        }
+
+        private async Task<AppUser> GetCurrentUser()
+        {
+            AppUser appUser = new();
+            try
+            {
+                if (_signInManager.IsSignedIn(User))
+                {
+                    AppUser? user = await _userManager.GetUserAsync(User);
+                    return user;
+                }
+            }
+            catch (Exception ex)
+            {
+                TempData["Error"] += ex.Message;
             }
             return null;
         }
@@ -121,11 +167,12 @@ namespace SMS_Marketing.Controllers
             }
             catch (Exception ex)
             {
-                ViewBag.Error += ex.Message;
+                TempData["Error"] += ex.Message;
                 RedirectToAction("Index", "Error");
             }
             return View();
         }
+
         //POST: Organization/Index
         [HttpPost]
         [ActionName("SubmitPost")]
@@ -197,13 +244,13 @@ namespace SMS_Marketing.Controllers
             }
             catch (Exception ex)
             {
-                ViewBag.Error += ex.Message;
+                TempData["Error"] += ex.Message;
                 RedirectToAction("Index", "Error");
             }
             if (id != null)
             {
                 var organization = await _context.Organizations.FindAsync(id);
-                ViewBag.Success = "Organization Retrieved";
+                TempData["Success"] = "Organization Retrieved";
                 if (organization != null) return View(organization);
             }
             return RedirectToAction("Index", "Organization", new { @id = id });
@@ -232,11 +279,12 @@ namespace SMS_Marketing.Controllers
             }
             catch (Exception ex)
             {
-                ViewBag.Error += ex.Message;
+                TempData["Error"] += ex.Message;
                 RedirectToAction("Index", "Error");
             }
             return credentialStore;
         }
+
         private async Task<bool> PostToFacebookImage(string message, IFormFile imageFile, int? id)
         {
             try
@@ -314,6 +362,7 @@ namespace SMS_Marketing.Controllers
             }
             return false;
         }
+
         private async Task<bool> PostToTwilio(string? url, string? body, int? id, int? smsGroup)
         {
             try
@@ -358,7 +407,7 @@ namespace SMS_Marketing.Controllers
             }
             catch (Exception ex)
             {
-                ViewBag.Error = ex.Message;
+                TempData["Error"] = ex.Message;
                 RedirectToAction("Index", "Error");
             }
             return false;
@@ -366,9 +415,23 @@ namespace SMS_Marketing.Controllers
 
 
         // GET: OrganizationController/UserManagement/5
-        public async Task<ActionResult> UserManagement(int id)
+        public async Task<ActionResult> UserManagement(int? id)
         {
-            return View();
+            Organization? organization = new Organization();
+            try
+            {
+                if (id == null) throw new Exception("Invalid Id.");
+                organization = await GetCurrentOrg(id);
+                organization.AppUsers = await GetCurrentUsers(id);
+                if (organization.AppUsers == null) throw new Exception();
+                return View(organization);
+            }
+            catch (Exception ex)
+            {
+                TempData["Error"] = ex.Message;
+                RedirectToAction("Index", "Error");
+            }
+            return View(organization);
         }
 
         // GET: OrganizationController/Create
@@ -386,13 +449,14 @@ namespace SMS_Marketing.Controllers
                                 .Where(x => x.OrganizationId == id)
                                 .ToList();
                     CustomerViewModel customersViewModel = new CustomerViewModel(organization, group, users);
+                    TempData["Success"] = "Customers Retrieved";
                     return View(customersViewModel);
                 }
 
             }
             catch (Exception ex)
             {
-                ViewBag.Error = ex.Message;
+                TempData["Error"] = ex.Message;
             }
             return RedirectToAction("Index", "Error");
         }
@@ -452,6 +516,38 @@ namespace SMS_Marketing.Controllers
             {
                 return View();
             }
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        [ActionName("AddUser")]
+        public async Task<ActionResult> AddUser(int? id, string? email)
+        {
+            //int id = 1;
+            try
+            {
+                if (email == null) throw new Exception("Bad Input");
+                var targetUser = _authContext.Users
+                    .Where(x => x.Email == email)
+                    .ToList().FirstOrDefault();
+                if (targetUser == null) throw new Exception("User does not exist.");
+                var currentUser = await GetCurrentUser();
+                if (targetUser == null) throw new Exception("User does not exist.");
+                Invite invite = new();
+                invite.AuthorId = currentUser.Id;
+                invite.TargetUserId = targetUser.Id;
+                invite.TargetEmail = email;
+                _context.Invites.Add(invite);
+                await _context.SaveChangesAsync();
+                ViewData["Success"] = "Invite was sent.";
+                return View("UserManagement");
+            }
+            catch (Exception ex)
+            {
+                ViewData["Error"] += ex.Message;
+                return RedirectToAction("Index", "Error");
+            }
+            return View();
         }
     }
 }
