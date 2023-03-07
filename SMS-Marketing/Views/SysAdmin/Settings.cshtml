@@ -17,14 +17,26 @@
         </li>        
     </ul>
 </section>
-<section class="container mt-4 mb-5">
-    <div class="row">
-        <div class="col-3">
-            <partial name="../SysAdmin/AdminSettings/_SettingsMenu" />
-        </div>
-        <div class="col-8">
-            <partial name="../SysAdmin/AdminSettings/_SettingsForm.cshtml" for="@Model"/>
-            @*@Html.Partial("../SysAdmin/AdminSettings/_Twitter.cshtml")*@
-        </div>
-    </div>
-</section>
+@{
+    if(Model == null)
+    {
+        <section class="container mt-4 mb-5">
+            <p>There are no loaded settings</p>
+        </section>
+    }
+    else
+    {
+        <section class="container mt-4 mb-5">
+            <div class="row">
+                <div class="col-3">
+                    <partial name="../SysAdmin/AdminSettings/_SettingsMenu" />
+                </div>
+                <div class="col-8">
+                    <partial name="../SysAdmin/AdminSettings/_SettingsForm.cshtml" for="@Model" />
+                    @*@Html.Partial("../SysAdmin/AdminSettings/_Twitter.cshtml")*@
+                </div>
+            </div>
+        </section>
+
+    }
+}

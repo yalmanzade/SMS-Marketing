@@ -53,3 +53,50 @@
         </div>
     </div>
 </section>
+@{
+    if(ViewBag.Invites != null)
+    {
+        List<Invite > invites = ViewBag.Invites;
+        <section class="mt-4">
+            <div class="text-center">
+                <div class="text-center">
+                    <h5 class="display-6">
+                        You have
+                        <span class="badge rounded-pill bg-danger">@invites.Count</span>
+                        notifications.
+                    </h5>
+                </div>
+               @{
+                   foreach (var invite in invites)
+                   {
+                        <div class="row pb-2">
+                            <div class="col col-3"></div>
+                            <div class="col">
+                                <div class="card">
+                                    <h5 class="card-header">Invitation to join.</h5>
+                                    <div class="card-body">
+                                        <p class="card-title">@invite.AuthorName invited to join their organization.</p>
+                                        <div class="row">
+                                            <div class="col">
+                                                <form asp-action="AcceptInvite" asp-controller="Home" asp-route-id="@invite.Id">
+                                                    <input class="btn btn-outline-primary btn-lg" type="submit" value="Accept"/>
+                                                </form>
+                                            </div>
+                                            <div class="col">
+                                                <form asp-action="DeclineInvite" asp-controller="Home" asp-route-id="@invite.Id">
+                                                    <input class="btn btn-outline-danger btn-lg" type="submit" value="Decline"/>
+                                                </form>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col col-3"></div>
+                        </div>
+                    }
+               }
+            </div>
+        </section>
+    }
+
+}

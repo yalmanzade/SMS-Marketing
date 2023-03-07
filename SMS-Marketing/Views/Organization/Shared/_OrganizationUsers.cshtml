@@ -1,21 +1,90 @@
 ﻿@model Organization
-<section class="container">
-    <div class="mb-3">
-            <h1>Edit User Access.</h1>
-    </div>
-    <form asp-action="EditUser" asp-controller="Organization" asp-route-id="@Model.Id">
-        <div class="mb-3">
-            <select class="form-select" aria-label="Select a user">
+@{
+    if(Model.AppUsers == null || Model.AppUsers.Count < 1)
+    {
+        <section class="container">
+            <div class="mb-3">
+                <h1>Edit User Access.</h1>
+            </div>
+            <form asp-action="EditUser" asp-controller="Organization" asp-route-id="@Model.Id">
+                <div class="mb-3">
+                    <select class="form-select" aria-label="Select a user">
+                        @{
+                            foreach (var item in Model.AppUsers)
+                            {
+                                <option value="@item.Id">@item.FirstName @item.LastName</option>
+                            }
+                        }
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <input class="btn btn-secondary" type="submit" value="Edit" />
+                </div>
+            </form>
+        </section>
+    }
+    else
+    {
+        <section class="container">
+            <div class="mb-3">
+                <h1>Edit User Access.</h1>
+            </div>
+            <div class="accordion" id="user-management">
                 @{
-                    foreach (var item in Model.AppUsers)
+                    int index = 1;
+                    foreach (var user in Model.AppUsers)
                     {
-                        <option value="@item.Id">@item.FirstName @item.LastName</option>
+                        <div class="accordion-item">
+                            <h2 class="accordion-header" id="@user.Id">
+                                <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#@user.Id" aria-expanded="false" aria-controls="@user.Id">
+                                    @user.FirstName @user.LastName
+                                </button>
+                            </h2>
+                            <div id="@user.Id" class="accordion-collapse collapse show" aria-labelledby="@user.Id" data-bs-parent="#user-management">
+                                <div class="accordion-body">
+                                    <form asp-action="ModifyPermissions" asp-controller="Organization" asp-route-id="@user.Id">
+                                        <input value="@Model.Id" name="orgId" hidden>
+                                        <legend>Change Permissions for @user.FirstName</legend>
+                                        <div class="pt-3">
+                                            <div class="form-check form-switch">
+                                                <label class="form-check-label">Active</label>
+                                                <input class="form-check-input" asp-for="@user.IsActive" />
+                                            </div>
+                                        </div>
+                                        <div class="pt-3">
+                                            <div class="form-check form-switch">
+                                                <label class="form-check-label" asp-for="@user.IsPost"></label>
+                                                <input class="form-check-input" asp-for="@user.IsPost" />
+                                            </div>
+                                        </div>
+                                        <div class="pt-3">
+                                            <div class="form-check form-switch">
+                                                <label class="form-check-label" asp-for="@user.IsUserManagement"></label>
+                                                <input class="form-check-input" asp-for="@user.IsUserManagement" />
+                                            </div>
+                                        </div>
+                                        <div class="pt-3">
+                                            <div class="form-check form-switch">
+                                                <label class="form-check-label" asp-for="@user.IsInsight"></label>
+                                                <input class="form-check-input" asp-for="@user.IsInsight" />
+                                            </div>
+                                        </div>
+                                        <div class="pt-3">
+                                            <div class="form-check form-switch">
+                                                <label class="form-check-label" asp-for="@user.IsCustomerManagment"></label>
+                                                <input class="form-check-input" asp-for="@user.IsCustomerManagment" />
+                                            </div>
+                                        </div>
+                                        <div class="pt-3">
+                                            <input class="btn btn-outline-primary" value="Save Changes" type="submit" />
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
                     }
                 }
-            </select>
-        </div>
-        <div class="mb-3">
-            <input class="btn btn-secondary" type="submit" value="Edit" />
-        </div>
-    </form>
-</section>
+            </div>
+        </section>
+    }
+}

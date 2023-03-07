@@ -40,7 +40,7 @@ namespace SMS_Marketing.Controllers
                     organization.IsActive = false;
                     _context.Update(organization);
                     await _context.SaveChangesAsync();
-                    ViewBag.Success = "The organization was disabled.";
+                    TempData["Success"] += "The organization was disabled.";
                 }
 
                 if (organization == null)
@@ -50,7 +50,7 @@ namespace SMS_Marketing.Controllers
             }
             catch (Exception ex)
             {
-                ViewBag.Error += ex.Message;
+                TempData["Error"] += ex.Message;
             }
             return RedirectToAction("Index");
         }
@@ -73,7 +73,7 @@ namespace SMS_Marketing.Controllers
             }
             catch (Exception ex)
             {
-                ViewBag.Error += ex.Message;
+                TempData["Error"] += ex.Message;
             }
             return View(organization);
         }
@@ -92,11 +92,11 @@ namespace SMS_Marketing.Controllers
                 obj.IsActive = false;
                 _context.Organizations.Update(obj);
                 await _context.SaveChangesAsync();
-                ViewBag.Success = "Organization Diabled deleted successfully";
+                TempData["Success"] += "Organization Diabled deleted successfully";
             }
             catch (Exception ex)
             {
-                ViewBag.Error += ex.Message;
+                TempData["Error"] += ex.Message;
             }
             return RedirectToAction("Index");
         }
@@ -110,7 +110,7 @@ namespace SMS_Marketing.Controllers
             }
             catch (Exception ex)
             {
-                ViewBag.Error += ex.Message;
+                TempData["Error"] += ex.Message;
             }
             return View();
         }
@@ -127,24 +127,25 @@ namespace SMS_Marketing.Controllers
                 {
                     string? OrganizationName = collection["Name"];
                     string? ManagerId = collection["ManagerId"];
-                    if (OrganizationName == null || ManagerId == null) ViewBag.Error = "We could not create the organization. Please try again.";
+                    if (OrganizationName == null || ManagerId == null) throw new Exception("We could not create the organization. Please try again.");
                     Organization organization = new();
                     organization.IsActive = true;
                     organization.Name = OrganizationName;
                     organization.ManagerId = ManagerId;
                     var OrgUser = _authContext.Users.Find(ManagerId);
-                    if (OrgUser == null) ViewBag.Error = "We could not create the organization. Please try again.";
+                    if (OrgUser == null) throw new Exception("We could not create the organization. Please try again.");
                     organization.ManagerName = $"{OrgUser.FirstName} {OrgUser.LastName}";
                     var PostedOganization = _context.Organizations.Add(organization);
                     await _context.SaveChangesAsync();
+
                 }
                 throw new Exception("There was a problem with the form. Please try again later.");
             }
             catch (Exception ex)
             {
-                ViewBag.Error += ex.Message;
+                TempData["Error"] += ex.Message;
             }
-            return View("Index");
+            return RedirectToAction("Index");
         }
 
         // GET: SysAdminController/Edit/5
@@ -180,7 +181,7 @@ namespace SMS_Marketing.Controllers
                     }
                     else
                     {
-                        ViewBag.Error = "We could not find this organization.";
+                        TempData["Error"] = "We could not find this organization.";
                         return RedirectToAction(nameof(Index));
                     }
                     string OrganizationName = collection["Name"];
@@ -206,14 +207,14 @@ namespace SMS_Marketing.Controllers
                     organization.IsSMS = true;
                     _context.Organizations.Update(organization);
                     await _context.SaveChangesAsync();
-                    ViewBag.Success = "Organization updated successfully.";
+                    TempData["Success"] = "Organization updated successfully.";
                     return RedirectToAction("Index");
                 }
                 throw new Exception("There was an unknown issue. Please try again.");
             }
             catch (Exception ex)
             {
-                ViewBag.ErrorMessage += ex.Message;
+                TempData["Error"] += ex.Message;
                 return View();
             }
         }
@@ -240,7 +241,7 @@ namespace SMS_Marketing.Controllers
             }
             catch (Exception ex)
             {
-                ViewBag.ErrorMessage += ex.Message;
+                TempData["Error"] += ex.Message;
             }
             return View();
         }
@@ -257,9 +258,9 @@ namespace SMS_Marketing.Controllers
                     if (currentSetting != null)
                     {
                         currentSetting.Value = setting;
-                        _context.Update(currentSetting);
+                        _context.AppSettings.Update(currentSetting);
                         await _context.SaveChangesAsync();
-                        ViewBag.Success = "Settings Updated";
+                        TempData["Success"] += "Settings Updated";
                     }
                     else
                     {
@@ -273,7 +274,7 @@ namespace SMS_Marketing.Controllers
             }
             catch (Exception ex)
             {
-                ViewBag.ErrorMessage += ex.Message;
+                TempData["Error"] += ex.Message;
             }
             return RedirectToAction("Settings");
         }
