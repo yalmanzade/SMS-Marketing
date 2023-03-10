@@ -86,7 +86,8 @@ namespace SMS_Marketing.Controllers
         //POST: Organization/Index
         [HttpPost]
         [ActionName("SubmitPost")]
-        public async Task<ActionResult> SubmitPost(string postText, IFormFile postPicture, int? id, int smsGroup, string? url)
+        public async Task<ActionResult> SubmitPost(string postText, IFormFile postPicture, int? id, int smsGroup, string? url,
+                                                   IFormCollection collection)
         {
             try
             {
@@ -147,10 +148,21 @@ namespace SMS_Marketing.Controllers
                 //        throw new Exception("Result is null. There has been an error sending your message.");
                 //    }
                 //}
-                if (true)
-                {
-                    _ = await PostToTwilio(url, postText, id, smsGroup);
-                }
+                //if (true)
+                //{
+                //    _ = await PostToTwilio(url, postText, id, smsGroup);
+                //}
+                Organization? organization = await GetCurrentOrg(id);
+                AppUser appUser = await GetCurrentUser();
+                Post post = InitPost(collection);
+                post.OrganizationId = organization.Id;
+                post.OrganizationName = organization.Name;
+                post.AuthorId = appUser.Id;
+                post.AuthorName = $"{appUser.FirstName} {appUser.LastName}";
+                post.Success = true;
+                post.OnFacebook = true;
+                post.OnSMS = true;
+                await LogPost(post);
             }
             catch (Exception ex)
             {
@@ -159,10 +171,9 @@ namespace SMS_Marketing.Controllers
             }
             if (id != null)
             {
-                var organization = await _context.Organizations.FindAsync(id);
-                TempData["Success"] += "Organization Retrieved";
-                if (organization != null) return View(organization);
+                return RedirectToAction("Index", new { id = id });
             }
+            TempData["Error"] += "Unexpected Error.";
             return RedirectToAction("Index", "Organization", new { @id = id });
         }
 
@@ -323,6 +334,40 @@ namespace SMS_Marketing.Controllers
             return false;
         }
 
+        //This method logs a post to the database.
+        private async Task LogPost(Post post)
+        {
+            try
+            {
+                if (post == null) throw new Exception("Null Post");
+                await _context.Posts.AddAsync(post);
+                await _context.SaveChangesAsync();
+            }
+            catch (Exception ex)
+            {
+                var currentSystem = $"Failed to log post for {post.OrganizationName}.";
+                Error.InitializeError(currentSystem, "100", ex.Message);
+                Error.LogError();
+            }
+        }
+
+        private Post InitPost(IFormCollection collection)
+        {
+            Post post = new Post();
+            try
+            {
+                if (collection["IsTwitter"] == "on") post.OnTwitter = true; else post.OnTwitter = false;
+                if (collection["IsFacebook"] == "on") post.OnFacebook = true; else post.OnFacebook = false;
+                if (collection["IsSMS"] == "on") post.OnSMS = true; else post.OnSMS = false;
+            }
+            catch (Exception ex)
+            {
+                var currentSystem = $"Failed to init post";
+                Error.InitializeError(currentSystem, "100", ex.Message);
+                Error.LogError();
+            }
+            return post;
+        }
         #endregion
 
         #region User Management
@@ -371,7 +416,7 @@ namespace SMS_Marketing.Controllers
                 var currentOrganization = await GetCurrentOrg(id);
                 if (currentOrganization == null) throw new Exception("We could not retrieve your data.");
                 invite.InvitingOrganizationId = currentOrganization.Id;
-                _context.Invites.Add(invite);
+                await _context.Invites.AddAsync(invite);
                 TempData["Success"] += $"Invite was sent to {email}";
                 await _context.SaveChangesAsync();
                 return RedirectToAction("UserManagement", new { id = id });
@@ -421,6 +466,28 @@ namespace SMS_Marketing.Controllers
             TempData["Error"] += "There was an unexpected error.";
             return View("Index", "Error");
         }
+
+        [ActionName("RemoveUser")]
+        public async Task<ActionResult> RemoveUser(string? id)
+        {
+            try
+            {
+                if (id == null) throw new Exception("Invalid Id.");
+                AppUser? appUser = await _authContext.Users.FindAsync(id);
+                if (appUser == null) throw new Exception("Invalid User.");
+                int orgId = appUser.OrganizationId;
+                appUser.OrganizationId = -1;
+                appUser.ResetPermissions();
+                await _authContext.SaveChangesAsync();
+                TempData["Success"] = $"{appUser.FirstName} {appUser.LastName} was removed.";
+                return RedirectToAction("UserManagement", new { id = orgId });
+            }
+            catch (Exception ex)
+            {
+                TempData["Error"] += ex.Message;
+                return View("Index", "Error");
+            }
+        }
         #endregion
 
         #region Customer and Group Management
@@ -440,7 +507,6 @@ namespace SMS_Marketing.Controllers
                                 .Where(x => x.OrganizationId == id)
                                 .ToList();
                     CustomerViewModel customersViewModel = new CustomerViewModel(organization, group, users);
-                    TempData["Success"] += "Customers Retrieved";
                     return View(customersViewModel);
                 }
 
@@ -450,6 +516,49 @@ namespace SMS_Marketing.Controllers
                 TempData["Error"] = ex.Message;
             }
             return RedirectToAction("Index", "Error");
+        }
+
+        #endregion
+
+        #region Insights
+
+        // GET : OrganizationController/Insights/3
+        public async Task<ActionResult> Insights(int? id)
+        {
+            try
+            {
+                if (id == null) throw new Exception("Invalid Id.");
+                Organization? organization = await _context.Organizations.FindAsync(id);
+                if (organization == null) throw new Exception("Organization was not found.");
+                organization.RecentPosts = await FetchPosts(id);
+                return View(organization);
+            }
+            catch (Exception ex)
+            {
+                TempData["Error"] = ex.Message;
+                return View("Index", "Error");
+            }
+        }
+
+        private async Task<List<Post>> FetchPosts(int? id)
+        {
+            List<Post> posts = new();
+            try
+            {
+                if (id == null) throw new Exception("Null Organization Id");
+                posts = _context.Posts
+                                 .Where(x => x.OrganizationId == id)
+                                 .Take(5)
+                                 .ToList();
+                return posts;
+            }
+            catch (Exception ex)
+            {
+                var currentSystem = $"Failed to log fetch posts";
+                Error.InitializeError(currentSystem, "100", ex.Message);
+                Error.LogError();
+            }
+            return null;
         }
 
         #endregion
@@ -467,7 +576,6 @@ namespace SMS_Marketing.Controllers
                              .Where(g => g.OrganizationId == id)
                              .ToList();
                     //if (groups != null) ViewData["CurrentOrg"] = groups;
-                    TempData["Success"] += "Groups Retrieved";
                     if (groups != null) return groups;
                 }
                 if (groups == null)
@@ -520,7 +628,6 @@ namespace SMS_Marketing.Controllers
                 {
                     organization = await _context.Organizations.FindAsync(id);
                     if (organization != null) ViewData["CurrentOrg"] = organization;
-                    TempData["Success"] += "Organization Retrieved";
                     if (organization != null) return organization;
                 }
                 if (organization == null)

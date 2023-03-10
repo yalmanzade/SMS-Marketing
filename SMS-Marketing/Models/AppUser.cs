@@ -38,10 +38,14 @@ namespace SMS_Marketing.Models
             IsCustomerManagment = false;
             IsSystemManager = false;
         }
-        public string Checked(bool condition)
+        public void SetOrgManagerPermissions()
         {
-            if (condition) return "checked";
-            return "";
+            IsActive = true;
+            IsPost = true;
+            IsUserManagement = true;
+            IsInsight = true;
+            IsCustomerManagment = true;
+            IsSystemManager = false;
         }
     }
 }

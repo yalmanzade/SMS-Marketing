@@ -26,12 +26,12 @@
     }
     else
     {
-        <section class="container mt-4 mb-5">
+        <section class="container">
             <div class="row">
-                <div class="col-3">
+                <div class="col-3 mt-4 mb-5">
                     <partial name="../SysAdmin/AdminSettings/_SettingsMenu" />
                 </div>
-                <div class="col-8">
+                <div class="col-8 mt-3">
                     <partial name="../SysAdmin/AdminSettings/_SettingsForm.cshtml" for="@Model" />
                     @*@Html.Partial("../SysAdmin/AdminSettings/_Twitter.cshtml")*@
                 </div>

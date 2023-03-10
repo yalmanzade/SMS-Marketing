@@ -1,0 +1,16 @@
+﻿@model int
+@{
+    ViewData["Title"] = "Unsubscribe";
+    Layout = "~/Views/Share/Shared/_SharedLayout.cshtml";
+}
+<section class="container">
+    <form asp-action="UnsubscribeUser" asp-controller="Share">
+        <div class="mb-3">
+            <label for="phoneN" class="form-label"></label>
+            <input id="phoneN" name="phoneN" class="form-control" required>
+        </div>
+        <div class="mb-3">
+            <input type="submit" class="btn btn-lg btn-primary" value="Sign Up" />
+        </div>
+    </form>
+</section>

@@ -1,17 +1,17 @@
 ﻿@model Organization
 @{
-    ViewData["Title"] = "User Management";
+    ViewData["Title"] = "Insights";
 }
-<section class="container">
+<section class="container"> 
     <partial name="../Organization/Shared/_Greeting.cshtml" for="@Model" />
 </section>
-<section class="container mb-2">
+<section class="container">
     <ul class="nav nav-tabs">
         <li class="nav-item">
             <a class="nav-link" asp-action="Index" asp-controller="Organization" asp-route-id="@Model.Id">Posts</a>
         </li>
         <li class="nav-item">
-            <a class="nav-link active" aria-current="page" asp-action="UserManagement" asp-controller="Organization" asp-route-id="@Model.Id">User Management</a>
+            <a class="nav-link" asp-action="UserManagement" asp-controller="Organization" asp-route-id="@Model.Id">User Management</a>
         </li>
         <li class="nav-item">
             <a class="nav-link" asp-action="Customers" asp-controller="Organization" asp-route-id="@Model.Id">Customers</a>
@@ -20,17 +20,23 @@
             <a class="nav-link" asp-action="Groups" asp-controller="Organization" asp-route-id="@Model.Id">Groups</a>
         </li>
         <li class="nav-item">
-            <a class="nav-link" asp-action="Insights" asp-controller="Organization" asp-route-id="@Model.Id">Insights</a>
+            <a class="nav-link active" asp-action="Insights" asp-controller="Organization" asp-route-id="@Model.Id">Insights</a>
         </li>
     </ul>
 </section>
 <section class="container">
     <div class="row">
         <div class="col">
-            <partial name="../Organization/Shared/_AddUser.cshtml" for="@Model" />
+            <section class="container pt-2">
+                <div class="row">
+                    <p class="fs-2">Usage Statistics</p>
+                </div>
+                <p class="fs-5">Usage statistics explain how your organization uses the platform.</p>
+                <partial name="../Organization/Shared/_ReportModal.cshtml" for="@Model.RecentPosts" />
+            </section>
         </div>
         <div class="col">
-            <partial name="../Organization/Shared/_OrganizationUsers.cshtml" for="@Model" />
+
         </div>
     </div>
 </section>

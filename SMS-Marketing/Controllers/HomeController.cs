@@ -12,13 +12,16 @@ namespace SMS_Marketing.Controllers
     public class HomeController : Controller
     {
         #region Properties
+
         private readonly ApplicationDbContext _context;
         private readonly UserAuthDbContext _authContext;
         private readonly ILogger<HomeController> _logger;
         private readonly UserManager<AppUser> _userManager;
         private readonly SignInManager<AppUser> _signInManager;
+
         #endregion
         #region Constructor
+
         public HomeController(UserAuthDbContext userAuth, ApplicationDbContext context, ILogger<HomeController> logger, UserManager<AppUser> userManager,
             SignInManager<AppUser> signInManage)
         {
@@ -28,6 +31,7 @@ namespace SMS_Marketing.Controllers
             _context = context;
             _authContext = userAuth;
         }
+
         #endregion
         public async Task<IActionResult> Index()
         {
@@ -47,7 +51,13 @@ namespace SMS_Marketing.Controllers
             return View();
         }
 
+        public ActionResult AboutUs()
+        {
+            return View();
+        }
+
         #region Invite
+
         [HttpPost]
         [ActionName("DeclineInvite")]
         public async Task<ActionResult> DeclineInvite(int? id)
@@ -101,6 +111,7 @@ namespace SMS_Marketing.Controllers
             }
             return RedirectToAction("Index", "Error");
         }
+
         #endregion
 
 
@@ -141,6 +152,7 @@ namespace SMS_Marketing.Controllers
         }
 
         #endregion
+
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
         public IActionResult Error()
         {

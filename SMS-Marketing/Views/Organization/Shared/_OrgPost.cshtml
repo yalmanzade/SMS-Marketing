@@ -1,6 +1,8 @@
-﻿
+﻿<section class="container pt-2"> 
+    <p class="fs-2">Write a message</p>
+</section>
 <section class="container mb-5">
-    <form asp-controller="Organization" asp-action="SubmitPost" method="post" enctype="multipart/form-data">
+    <form asp-controller="Organization" asp-action="SubmitPost">
         <input name="id" type="hidden" value="@Model.Id" />
         <div class="input-group mt-3">
             <span class="input-group-text">New Post</span>
@@ -11,13 +13,15 @@
             <input class="form-control form-control-lg" id="postPicture" name="postPicture" type="file">
         </div>
         @{
-            <label for="servies form-label mt-3">Post to the following services</label>
+            <div class="pt-2">
+                <p class="fs-4">Post to the following services</p>
+            </div>
             if (Model.IsSMS)
             {
                 <div class="input-group mt-2">
                     <div class="form-check">
-                        <input class="form-check-input" type="checkbox" name="IsSMS">
-                        <label class="form-check-label" for="flexCheckDefault">
+                        <input class="form-check-input" type="checkbox" id="IsSMS" name="IsSMS">
+                        <label class="form-check-label" for="IsSMS">
                             SMS Message
                         </label>
                     </div>
@@ -62,8 +66,11 @@
                 </div>
             }
         }
-        <button class="btn btn-primary">
-            Submit
-        </button>
-    </form>
+        <div class="mb-3 mt-2">
+            <button class="btn btn-primary btn-lg">
+                <i class="fa-solid fa-square-pen"></i>
+                Submit
+            </button>
+        </div>
+        </form>
 </section>

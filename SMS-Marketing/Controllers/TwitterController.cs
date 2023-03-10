@@ -1,4 +1,5 @@
 ﻿using LinqToTwitter;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http.Extensions;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -8,8 +9,10 @@ using SMS_Marketing.Models;
 
 namespace SMS_Marketing.Controllers
 {
+    [Authorize]
     public class TwitterController : Controller
     {
+        #region Init
         private readonly ApplicationDbContext _context;
         private readonly UserAuthDbContext _authContext;
         private readonly UserManager<AppUser> _userManager;
@@ -23,13 +26,19 @@ namespace SMS_Marketing.Controllers
             _context = context;
             _authContext = authDbContext;
         }
+        #endregion
+
         // GET: TwitterController
         public ActionResult Index()
         {
             return View();
         }
+
+        #region User Authentication
+
         //POST: TwitterController/Login/
         [ActionName("Login")]
+        [ValidateAntiForgeryToken]
         public async Task<ActionResult> Login(int? id)
         {
             try
@@ -55,7 +64,7 @@ namespace SMS_Marketing.Controllers
                         };
                         //string twitterCallbackUrl = Request.GetDisplayUrl().Replace("Login", "CompleteLogin");
                         TempData["CurrentOrg"] = id;
-                        string twitterCallbackUrl = "https://localhost:7076/Twitter/CompleteLogin/";
+                        string twitterCallbackUrl = "https://localhost:7076/Organization/MyOrganizations/";
                         return await auth.BeginAuthorizationAsync(new Uri(twitterCallbackUrl));
                     };
                     if (twitterAuth.AccessToken != null && twitterAuth.OAuthToken != null)
@@ -130,6 +139,29 @@ namespace SMS_Marketing.Controllers
             string twitterCallbackUrl = Request.GetDisplayUrl().Replace("Login", "CompleteLogin");
             return await auth.BeginAuthorizationAsync(new Uri(twitterCallbackUrl));
         }
+
+        private async Task<Organization> AddTwitterToOrganization(int id)
+        {
+            Organization organization = new();
+            try
+            {
+                organization = _context.Organizations
+                                .Where(i => i.Id == id)
+                                .FirstOrDefault() ?? throw new ArgumentException();
+                organization.IsTwitter = true;
+                _context.Organizations.Update(organization);
+            }
+            catch (Exception ex)
+            {
+                ViewBag.Error = ex.Message;
+            }
+            return organization;
+        }
+
+        #endregion
+
+        #region For Testing - not in production
+
         //GET: TwitterController/Details/5
         [ActionName("CompleteLogin")]
         public async Task<ActionResult> CompleteLogin()
@@ -173,24 +205,6 @@ namespace SMS_Marketing.Controllers
             return View();
         }
 
-        private async Task<Organization> AddTwitterToOrganization(int id)
-        {
-            Organization organization = new();
-            try
-            {
-                organization = _context.Organizations
-                                .Where(i => i.Id == id)
-                                .FirstOrDefault() ?? throw new ArgumentException();
-                organization.IsTwitter = true;
-                _context.Organizations.Update(organization);
-            }
-            catch (Exception ex)
-            {
-                ViewBag.Error = ex.Message;
-            }
-            return organization;
-        }
-
         //POST TwitterController/Twitter/CompleteLogin
         [HttpPost]
         [ActionName("Create-Tweet")]
@@ -231,6 +245,7 @@ namespace SMS_Marketing.Controllers
             }
             return RedirectToAction("Index", "Home");
         }
+
         // GET: TwitterController/ViewTweets
         [ActionName("ViewTweets")]
         public async Task<ActionResult> ViewTweets()
@@ -264,73 +279,6 @@ namespace SMS_Marketing.Controllers
             return View();
         }
 
-        //// GET: TwitterController/Details/5
-        //public ActionResult Details(int id)
-        //{
-        //    return View();
-        //}
-
-        //// GET: TwitterController/Create
-        //public ActionResult Create()
-        //{
-        //    return View();
-        //}
-
-        //// POST: TwitterController/Create
-        //[HttpPost]
-        //[ValidateAntiForgeryToken]
-        //public ActionResult Create(IFormCollection collection)
-        //{
-        //    try
-        //    {
-        //        return RedirectToAction(nameof(Index));
-        //    }
-        //    catch
-        //    {
-        //        return View();
-        //    }
-        //}
-
-        //// GET: TwitterController/Edit/5
-        //public ActionResult Edit(int id)
-        //{
-        //    return View();
-        //}
-
-        //// POST: TwitterController/Edit/5
-        //[HttpPost]
-        //[ValidateAntiForgeryToken]
-        //public ActionResult Edit(int id, IFormCollection collection)
-        //{
-        //    try
-        //    {
-        //        return RedirectToAction(nameof(Index));
-        //    }
-        //    catch
-        //    {
-        //        return View();
-        //    }
-        //}
-
-        //// GET: TwitterController/Delete/5
-        //public ActionResult Delete(int id)
-        //{
-        //    return View();
-        //}
-
-        //// POST: TwitterController/Delete/5
-        //[HttpPost]
-        //[ValidateAntiForgeryToken]
-        //public ActionResult Delete(int id, IFormCollection collection)
-        //{
-        //    try
-        //    {
-        //        return RedirectToAction(nameof(Index));
-        //    }
-        //    catch
-        //    {
-        //        return View();
-        //    }
-        //}
+        #endregion
     }
 }

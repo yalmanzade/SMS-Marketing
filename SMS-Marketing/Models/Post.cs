@@ -1,6 +1,5 @@
 ﻿using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
 
 namespace SMS_Marketing.Models
 {
@@ -10,37 +9,42 @@ namespace SMS_Marketing.Models
         [Required]
         [DisplayName("Id")]
         public int Id { get; set; }
+
         [Required]
         [DisplayName("Organization ID")]
-        public int OrganizationId { get; set; }
+        public int? OrganizationId { get; set; } = -1;
+
         [Required]
-        [DisplayName("Body")]
-        [DataType(DataType.Text)]
-        public string Body { get; set; }
-        [DataType(DataType.DateTime)]
+        [DisplayName("Organization")]
+        public string OrganizationName { get; set; } = string.Empty;
+
         [DisplayName("Post Date")]
-        public DateTime EntryDate { get; set; }
+        public DateTime PostedDate { get; set; } = DateTime.Now;
+
+        [Required]
+        [DisplayName("Author Id")]
+        [DataType(DataType.Text)]
+        public string AuthorId { get; set; } = string.Empty;
+
         [Required]
         [DisplayName("Posted By")]
         [DataType(DataType.Text)]
-        public string Author { get; set; }
+        public string AuthorName { get; set; } = string.Empty;
+
         [Required]
-        [DisplayName("On Tweeter")]
-        public bool OnTweeter { get; set; }
+        [DisplayName("On Twitter")]
+        public bool OnTwitter { get; set; } = false;
+
         [Required]
         [DisplayName("On SMS")]
-        public bool OnSMS { get; set; }
+        public bool OnSMS { get; set; } = false;
+
         [Required]
         [DisplayName("On Facebook")]
-        public bool OnFacebook { get; set; }
-        [NotMapped]
-        public string TweeterBody
-        {
-            get
-            {
-                if (Body.Length < 281) return Body;
-                return Body.Substring(0, 280);
-            }
-        }
+        public bool OnFacebook { get; set; } = false;
+
+        [Required]
+        [DisplayName("Success")]
+        public bool Success { get; set; } = false;
     }
 }

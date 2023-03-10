@@ -19,5 +19,6 @@ namespace SMS_Marketing.Data
         public DbSet<Group> Groups { get; set; } = default!;
         public DbSet<Customer> Customers { get; set; } = default!;
         public DbSet<Invite> Invites { get; set; } = default!;
+        public DbSet<Post> Posts { get; set; } = default!;
     }
 }
