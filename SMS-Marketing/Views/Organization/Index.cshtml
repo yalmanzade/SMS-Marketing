@@ -30,6 +30,9 @@
             @*<partial name="_OrgPost" model="Model"/>*@
         </div>
         <div class="col">
+            <section class="container pt-2 ml-0">
+                <partial name="../Organization/Shared/_Qr.cshtml" for="@Model" />
+            </section>
             <section class="container pt-2">
                 <p class="fs-2">Your Services</p>
             </section>
@@ -46,9 +49,6 @@
                             Disable Twitter</a>
                     </div>
                 </div>
-            </section>
-            <section class="container pt-2 ml-0">
-                <partial name="../Organization/Shared/_Qr.cshtml" for="@Model" />
             </section>
         </div>
     </div>

@@ -117,7 +117,7 @@ namespace SMS_Marketing.Controllers
                     };
                     await _context.Groups.AddAsync(group);
 
-                    //Upates both contexts
+                    //Updates both contexts
                     await _authContext.SaveChangesAsync();
                     await _context.SaveChangesAsync();
                     return View("Index");
@@ -145,7 +145,7 @@ namespace SMS_Marketing.Controllers
                 if (organization == null) throw new Exception("Invalid organization. Try again.");
                 organization.IsActive = false;
                 List<AppUser> appUsers = new();
-                appUsers = await _authContext.Users.Where(x => x.OrganizationId == id).ToListAsync();
+                appUsers = _authContext.Users.Where(x => x.OrganizationId == id).ToList();
                 if (appUsers != null && appUsers.Count > 0)
                 {
                     appUsers.ForEach(user =>
@@ -281,6 +281,15 @@ namespace SMS_Marketing.Controllers
                 TempData["Error"] += ex.Message;
                 return View();
             }
+        }
+
+        #endregion
+
+        #region Insights
+
+        public ActionResult Insights()
+        {
+            return View();
         }
 
         #endregion
