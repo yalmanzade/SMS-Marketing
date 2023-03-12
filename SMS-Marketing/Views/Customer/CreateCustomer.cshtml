@@ -1,0 +1,39 @@
+﻿@model Organization
+@{
+    ViewData["Title"] = "Customers";
+}
+<section class="container">
+    <ul class="nav nav-tabs">
+        <li class="nav-item">
+            <a class="nav-link" asp-action="Index" asp-controller="Organization" asp-route-id="@Model.Id">Posts</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" asp-action="UserManagement" asp-controller="Organization" asp-route-id="@Model.Id">User Management</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link active" asp-action="Customers" asp-controller="Organization" asp-route-id="@Model.Id">Customers</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" href="#">Insights</a>
+        </li>
+    </ul>
+</section>
+<section>
+    <form asp-action="Submit" asp-controller="Customer" asp-route-id="@Model.Id" method="post">
+        <div class="form-group">
+            <label for="FirstNameInput">Enter First Name: </label>
+            <input id="FirstNameInput"name="FirstNameInput"type="text" />
+        </div>
+        <div class="form-group">
+            <label for="LastNameInput">Enter Last Name: </label>
+            <input id="LastNameInput" name="LastNameInput" type="text" />
+        </div>
+        <div class="form-group">
+            <label for="PhoneNumberInput">Enter Phone Number: </label>
+            <input id="PhoneNumberInput" name="PhoneNumberInput" type="text"/>
+        </div
+        <div class="form-group">
+            <input type="submit" value="Create Customer" class="btn btn-primary" />
+        </div>
+    </form>
+</section>

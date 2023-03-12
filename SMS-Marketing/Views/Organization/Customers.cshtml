@@ -22,27 +22,34 @@
     <div class="row">
         <div class="col">
             <h1>Your groups</h1>
-            <a asp-action="CreateGroup" asp-controller="Organization">Create Group?</a>
+            <a asp-action="CreateCustomer" asp-controller="Customer" asp-route-id="@Model.Organization.Id">Create Customer?</a>
             <table class="table table-hover table-light">
                 <thead>
                     <tr>
-                        <th scope="auto">Name</th>
+                        <th scope="auto">Last Name</th>
+                        <th scope="auto">First Name</th>
+                        <th scope="auto">Phone Number</th>
                         <th scope="auto">Actions</th>
                     </tr>
                 </thead>
                 <tbody>
-                    @{
-                        foreach (var item in Model.Groups)
-                        {
+                    <form method="post">
+                        @{
+                            foreach (var item in Model.Customers.Where(e => e.IsActive == true))
+                            {
                             <tr>
+                                <td>@item.LastName</td>
                                 <td>@item.Name</td>
+                                <td>@item.PhoneNumber</td>
                                 <td>
                                     <a class="btn btn-outline-secondary">Details</a>
-                                    <a class="btn btn-outline-danger">Delete</a>
+                                    <input type="submit" class="btn btn-danger" value="Delete" asp-action="Delete" asp-controller="Customer"
+                                   asp-route-id="@item.Id" />
                                 </td>
                             </tr>
+                            }
                         }
-                    }
+                    </form>
                 </tbody>
             </table>
         </div>

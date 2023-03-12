@@ -26,7 +26,6 @@ namespace SMS_Marketing.Controllers
             _context = context;
             _authContext = authDbContext;
         }
-
         // GET: OrganizationController
         public async Task<ActionResult> Index(int? id)
         {
@@ -358,13 +357,13 @@ namespace SMS_Marketing.Controllers
                 if (id != null)
                 {
                     var organization = await GetCurrentOrg(id);
-                    var users = _context.Customers
+                    var customers = _context.Customers
                                 .Where(x => x.OrganizationId == id)
                                 .ToList();
                     var group = _context.Groups
                                 .Where(x => x.OrganizationId == id)
                                 .ToList();
-                    CustomerViewModel customersViewModel = new CustomerViewModel(organization, group, users);
+                    CustomerViewModel customersViewModel = new CustomerViewModel(organization, group, customers);
                     TempData["Success"] = "Customers Retrieved";
                     return View(customersViewModel);
                 }

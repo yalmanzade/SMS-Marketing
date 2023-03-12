@@ -8,11 +8,10 @@ namespace SMS_Marketing.Models
         public int Id { get; set; }
         [Required]
         public int OrganizationId { get; set; }
-        [Required]
-        public int GroupId { get; set; }
+        public int GroupId { get; set; } = 0;
         [DataType(DataType.Text)]
         [StringLength(20)]
-        public string GroupName { get; set; } = string.Empty;
+        public string? GroupName { get; set; } = string.Empty;
         [DataType(DataType.Text)]
         [StringLength(20)]
         public string Name { get; set; } = string.Empty;
@@ -21,10 +20,8 @@ namespace SMS_Marketing.Models
         public string LastName { get; set; } = string.Empty;
         [Required]
         [StringLength(12)]
-        [DataType(DataType.PhoneNumber)]
-        public string PhoneNumber { get; set; } = string.Empty;
-        [StringLength(30)]
         [DataType(DataType.Text)]
-        public string Description { get; set; } = string.Empty;
+        public string PhoneNumber { get; set; } = string.Empty;
+        public bool IsActive { get; set; } = true;
     }
 }
