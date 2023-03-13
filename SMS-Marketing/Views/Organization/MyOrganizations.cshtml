@@ -1,0 +1,25 @@
+﻿@{
+    if (ViewBag.OrganizationList !=null)
+    {
+        List<Organization> organizations = ViewBag.OrganizationList;
+        if (organizations.Count == 0)
+        {
+            <p>There are no Organizations.</p>
+        }
+        else
+        {
+            <p>Choose an organization to manage.</p>
+            foreach (var organization in organizations)
+            {
+                <a href="/Organization/Index/@organization.Id" class="btn btn-primary" style="width:150px">
+                    @organization.Name
+                </a>
+            }
+
+        }
+    }
+    else
+    {
+        <p>We could not retrive the data.</p>
+    }
+}

@@ -1,0 +1,26 @@
+﻿@model ErrorViewModel
+@{
+    ViewData["Title"] = "WORK";
+}
+<form method="post" enctype="multipart/form-data">
+    <div>
+        <label for="accessToken">Access Token:</label>
+        <input type="text" id="accessToken" name="accessToken" />
+    </div>
+    <div>
+        <label for="pageId">Page ID:</label>
+        <input type="text" id="pageId" name="pageId" />
+    </div>
+    <div>
+        <label for="message">Message:</label>
+        <input type="text" id="message" name="message" />
+    </div>
+    <div>
+        <label for="imageFile">Image:</label>
+        <input type="file" id="imageFile" name="imageFile" />
+    </div>
+    <button type="submit">Send</button>
+    <div>@TempData["Result"]</div>
+</form>
+
+
