@@ -1,65 +1,188 @@
 ﻿using LinqToTwitter;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using SMS_Marketing.Areas.Identity.Data;
 using SMS_Marketing.Data;
 using SMS_Marketing.Models;
 
 namespace SMS_Marketing.Controllers
 {
+    [Authorize]
     public class SysAdminController : Controller
     {
+        #region Init
+
         private readonly ApplicationDbContext _context;
         private readonly UserAuthDbContext _authContext;
+        private readonly UserManager<AppUser> _userManager;
+        private readonly SignInManager<AppUser> _signInManager;
 
-        public SysAdminController(ApplicationDbContext context, UserAuthDbContext authDbContext)
+        public SysAdminController(ApplicationDbContext context, UserAuthDbContext authDbContext,
+                                  UserManager<AppUser> userManager, SignInManager<AppUser> signInManager)
         {
             _context = context;
             _authContext = authDbContext;
+            _userManager = userManager;
+            _signInManager = signInManager;
         }
 
+        #endregion
+
         // GET: SysAdminController
-        public ActionResult Index()
+        public async Task<ActionResult> Index()
         {
-            ViewBag.OrganizationList = _context.Organizations.ToList();
+            try
+            {
+                //Authentication Starts
+                //AppUser user = await GetCurrentUser();
+                //if (IsSysManager(user) == false) throw new Exception("You do not have access to this page.");
+                // End Authentication
+                ViewBag.OrganizationList = _context.Organizations.ToList();
+                return View();
+            }
+            catch (Exception ex)
+            {
+                TempData["Error"] = ex.Message;
+                return RedirectToAction("Index", "Error");
+            }
+        }
+
+        #region Organization Management
+
+        //This region handles creating, disabling and other operations relating to 
+        //managing organizations.
+
+        // GET: SysAdminController/Create 
+        public async Task<ActionResult> Create()
+        {
+            try
+            {
+                //Authentication Starts
+                //AppUser user = await GetCurrentUser();
+                //if (IsSysManager(user) == false) throw new Exception("You do not have access to this page.");
+                // End Authentication
+                ViewBag.UserList = _authContext.Users.ToList();
+            }
+            catch (Exception ex)
+            {
+                TempData["Error"] = ex.Message;
+                return RedirectToAction("Index", "Error");
+            }
             return View();
         }
 
+        // POST: SysAdminController/Create
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        [ActionName("Create")]
+        public async Task<ActionResult> Create(IFormCollection collection, Category obj)
+        {
+            try
+            {
+                //Authentication Starts
+                //AppUser user = await GetCurrentUser();
+                //if (IsSysManager(user) == false) throw new Exception("You do not have access to this page.");
+                // End Authentication
 
-        // GET: SysAdminController/Delete/5
+                if (ModelState.IsValid)
+                {
+                    //Gathers and checks data
+                    string? organizationName = collection["Name"];
+                    string? managerId = collection["ManagerId"];
+                    if (organizationName == null || managerId == null) throw new Exception("Invalid Parameters.");
+                    AppUser? organizationManager = await _authContext.Users.FindAsync(managerId.ToString());
+                    if (organizationManager == null) throw new Exception("We could not find this user.");
+
+                    //Creates new Organization
+                    Organization organization = new();
+                    organization.IsActive = true;
+                    organization.Name = organizationName;
+                    organization.ManagerId = organizationManager.Id;
+                    organization.ManagerName = $"{organizationManager.FirstName} {organizationManager.LastName}";
+                    await _context.Organizations.AddAsync(organization);
+
+                    //Set permissions for Organization Manager
+                    organizationManager.SetOrgManagerPermissions();
+                    _authContext.Users.Update(organizationManager);
+
+                    //Creates default group for the organization
+                    Group group = new Group()
+                    {
+                        OrganizationId = organization.Id,
+                        Name = "All Users",
+                        Description = "This group contains all users",
+                        IsDefault = true
+                    };
+                    await _context.Groups.AddAsync(group);
+
+                    //Updates both contexts
+                    await _authContext.SaveChangesAsync();
+                    await _context.SaveChangesAsync();
+                    return View("Index");
+                }
+                throw new Exception("There was a problem with the form. Please try again later.");
+            }
+            catch (Exception ex)
+            {
+                TempData["Error"] += ex.Message;
+                return RedirectToAction("Index", "Error");
+            }
+        }
+
         public async Task<ActionResult> Disable(int? id)
         {
             try
             {
-                if (id == null || id == 0)
-                {
-                    return NotFound();
-                }
-                var organization = _context.Organizations.Find(id);
-                if (organization != null)
-                {
-                    organization.IsActive = false;
-                    _context.Update(organization);
-                    await _context.SaveChangesAsync();
-                    ViewBag.Success = "The organization was disabled.";
-                }
+                //Authentication Starts
+                //AppUser user = await GetCurrentUser();
+                //if (IsSysManager(user) == false) throw new Exception("You do not have access to this page.");
+                // End Authentication
 
-                if (organization == null)
+                if (id == null) throw new Exception("Invalid Id.");
+                var organization = await _context.Organizations.FindAsync(id);
+                if (organization == null) throw new Exception("Invalid organization. Try again.");
+                organization.IsActive = false;
+                List<AppUser> appUsers = new();
+                appUsers = _authContext.Users.Where(x => x.OrganizationId == id).ToList();
+                if (appUsers != null && appUsers.Count > 0)
                 {
-                    return NotFound();
+                    appUsers.ForEach(user =>
+                    {
+                        user.IsActive = false;
+                        user.ResetPermissions();
+                        user.OrganizationId = -1;
+                        _authContext.Users.Update(user);
+                    });
                 }
+                int rows = await _context.Invites
+                                 .Where(x => x.InvitingOrganizationId == id)
+                                 .ExecuteDeleteAsync();
+                _context.Organizations.Update(organization);
+                await _context.SaveChangesAsync();
+                await _authContext.SaveChangesAsync();
+                TempData["Success"] += "The organization was disabled.";
             }
             catch (Exception ex)
             {
-                ViewBag.Error += ex.Message;
+                TempData["Error"] += ex.Message;
+                return RedirectToAction("Index", "Error");
             }
             return RedirectToAction("Index");
         }
+
         // GET: SysAdminController/Details/5
         public async Task<ActionResult> Details(int? id)
         {
             Organization? organization = new();
             try
             {
+                //Authentication Starts
+                //AppUser user = await GetCurrentUser();
+                //if (IsSysManager(user) == false) throw new Exception("You do not have access to this page.");
+                // End Authentication
+
                 if (id == null || id == 0)
                 {
                     return NotFound();
@@ -73,95 +196,32 @@ namespace SMS_Marketing.Controllers
             }
             catch (Exception ex)
             {
-                ViewBag.Error += ex.Message;
+                TempData["Error"] += ex.Message;
             }
             return View(organization);
-        }
-        //POST
-        [HttpPost, ActionName("Disable")]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DisablePOST(int? id)
-        {
-            try
-            {
-                var obj = _context.Organizations.Find(id);
-                if (obj == null)
-                {
-                    return NotFound();
-                }
-                obj.IsActive = false;
-                _context.Organizations.Update(obj);
-                await _context.SaveChangesAsync();
-                ViewBag.Success = "Organization Diabled deleted successfully";
-            }
-            catch (Exception ex)
-            {
-                ViewBag.Error += ex.Message;
-            }
-            return RedirectToAction("Index");
-        }
-
-        // GET: SysAdminController/Create
-        public ActionResult Create()
-        {
-            try
-            {
-                ViewBag.UserList = _authContext.Users.ToList();
-            }
-            catch (Exception ex)
-            {
-                ViewBag.Error += ex.Message;
-            }
-            return View();
-        }
-
-        // POST: SysAdminController/Create
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        [ActionName("Create")]
-        public async Task<ActionResult> Create(IFormCollection collection, Category obj)
-        {
-            try
-            {
-                if (ModelState.IsValid)
-                {
-                    string? OrganizationName = collection["Name"];
-                    string? ManagerId = collection["ManagerId"];
-                    if (OrganizationName == null || ManagerId == null) ViewBag.Error = "We could not create the organization. Please try again.";
-                    Organization organization = new();
-                    organization.IsActive = true;
-                    organization.Name = OrganizationName;
-                    organization.ManagerId = ManagerId;
-                    var OrgUser = _authContext.Users.Find(ManagerId);
-                    if (OrgUser == null) ViewBag.Error = "We could not create the organization. Please try again.";
-                    organization.ManagerName = $"{OrgUser.FirstName} {OrgUser.LastName}";
-                    var PostedOganization = _context.Organizations.Add(organization);
-                    await _context.SaveChangesAsync();
-                }
-                throw new Exception("There was a problem with the form. Please try again later.");
-            }
-            catch (Exception ex)
-            {
-                ViewBag.Error += ex.Message;
-            }
-            return View("Index");
         }
 
         // GET: SysAdminController/Edit/5
-        public ActionResult Edit(int? id)
+        public async Task<ActionResult> Edit(int? id)
         {
-            if (id == null || id == 0)
+            try
             {
-                return NotFound();
-            }
-            var organization = _context.Organizations.Find(id);
+                //Authentication Starts
+                //AppUser user = await GetCurrentUser();
+                //if (IsSysManager(user) == false) throw new Exception("You do not have access to this page.");
+                // End Authentication
 
-            if (organization == null)
-            {
-                return NotFound();
+                if (id == null) throw new ArgumentNullException("Id is not valid.");
+                var organization = await _context.Organizations.FindAsync(id);
+                if (organization == null) throw new Exception("Invalid Organization");
+                ViewBag.UserList = _authContext.Users.ToList();
+                return View(organization);
             }
-            ViewBag.UserList = _authContext.Users.ToList();
-            return View(organization);
+            catch (Exception ex)
+            {
+                TempData["Error"] += ex.Message;
+                return RedirectToAction("Index", "Error");
+            }
         }
 
         // POST: SysAdminController/Edit/5
@@ -171,6 +231,11 @@ namespace SMS_Marketing.Controllers
         {
             try
             {
+                //Authentication Starts
+                //AppUser user = await GetCurrentUser();
+                //if (IsSysManager(user) == false) throw new Exception("You do not have access to this page.");
+                // End Authentication
+
                 if (ModelState.IsValid)
                 {
                     Organization? organization = new();
@@ -180,7 +245,7 @@ namespace SMS_Marketing.Controllers
                     }
                     else
                     {
-                        ViewBag.Error = "We could not find this organization.";
+                        TempData["Error"] = "We could not find this organization.";
                         return RedirectToAction(nameof(Index));
                     }
                     string OrganizationName = collection["Name"];
@@ -206,17 +271,31 @@ namespace SMS_Marketing.Controllers
                     organization.IsSMS = true;
                     _context.Organizations.Update(organization);
                     await _context.SaveChangesAsync();
-                    ViewBag.Success = "Organization updated successfully.";
+                    TempData["Success"] = "Organization updated successfully.";
                     return RedirectToAction("Index");
                 }
                 throw new Exception("There was an unknown issue. Please try again.");
             }
             catch (Exception ex)
             {
-                ViewBag.ErrorMessage += ex.Message;
+                TempData["Error"] += ex.Message;
                 return View();
             }
         }
+
+        #endregion
+
+        #region Insights
+
+        public ActionResult Insights()
+        {
+            return View();
+        }
+
+        #endregion
+
+        #region App Settings
+
         //GET : SysAdminController/Settings/Id
         public async Task<ActionResult> Settings(string? id)
         {
@@ -240,10 +319,11 @@ namespace SMS_Marketing.Controllers
             }
             catch (Exception ex)
             {
-                ViewBag.ErrorMessage += ex.Message;
+                TempData["Error"] += ex.Message;
             }
             return View();
         }
+
         //POST: SysAdmin/PostSettings
         public async Task<ActionResult> PostSettings(string? setting, int? index)
         {
@@ -257,9 +337,9 @@ namespace SMS_Marketing.Controllers
                     if (currentSetting != null)
                     {
                         currentSetting.Value = setting;
-                        _context.Update(currentSetting);
+                        _context.AppSettings.Update(currentSetting);
                         await _context.SaveChangesAsync();
-                        ViewBag.Success = "Settings Updated";
+                        TempData["Success"] += "Settings Updated";
                     }
                     else
                     {
@@ -273,9 +353,48 @@ namespace SMS_Marketing.Controllers
             }
             catch (Exception ex)
             {
-                ViewBag.ErrorMessage += ex.Message;
+                TempData["Error"] += ex.Message;
             }
             return RedirectToAction("Settings");
         }
+
+        #endregion
+
+        #region Helper Methods
+
+        // Checks if user is the System Manager.
+        private static bool IsSysManager(AppUser appUser)
+        {
+            try
+            {
+                if (appUser == null) throw new Exception("Please log in to perform this operation.");
+                if (appUser.IsSystemManager == false) throw new Exception("You do not have access to perform this action.");
+                return true;
+            }
+            catch (Exception ex)
+            {
+                return false;
+            }
+        }
+
+        // Gets current User
+        private async Task<AppUser> GetCurrentUser()
+        {
+            AppUser appUser = new();
+            try
+            {
+                if (_signInManager.IsSignedIn(User))
+                {
+                    AppUser? user = await _userManager.GetUserAsync(User);
+                    if (user != null) return user;
+                }
+            }
+            catch (Exception ex)
+            {
+                TempData["Error"] += ex.Message;
+            }
+            return null;
+        }
+        #endregion
     }
 }

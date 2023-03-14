@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel;
+using System.ComponentModel.DataAnnotations;
 
 namespace SMS_Marketing.Models
 {
@@ -6,8 +7,10 @@ namespace SMS_Marketing.Models
     {
         [Key]
         public int Id { get; set; }
+
         [Required]
         public int OrganizationId { get; set; }
+
         public int GroupId { get; set; } = 0;
         [DataType(DataType.Text)]
         [StringLength(20)]
@@ -21,6 +24,7 @@ namespace SMS_Marketing.Models
         [StringLength(30)]
         public string LastName { get; set; }
         [Required]
+        [DisplayName("Phone Number")]
         [StringLength(12)]
         [DataType(DataType.Text)]
         public string PhoneNumber { get; set; }

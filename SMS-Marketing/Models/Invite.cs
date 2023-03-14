@@ -7,7 +7,11 @@ namespace SMS_Marketing.Models
         [Key]
         public int Id { get; set; }
         [Required]
+        public int InvitingOrganizationId { get; set; }
+        [Required]
         public string TargetUserId { get; set; } = string.Empty;
+        [Required]
+        public string AuthorName { get; set; } = string.Empty;
         [Required]
         public string AuthorId { get; set; } = string.Empty;
         [Required]

@@ -2,30 +2,15 @@
 @{
     ViewData["Title"] = "Organization " + @Model.Name;
 }
-<section class="container">
-    <h1>Organization: @Model.Name</h1>
-</section>
-<section class="container">
-    <h1>
-        @Model.ManagerName, Welcome to your organization.
-    </h1>
-</section>
-
-<section class="container">
-    <nav aria-label="breadcrumb">
-      <ol class="breadcrumb">
-        <li class="breadcrumb-item"><a href="#">Home</a></li>
-        <li class="breadcrumb-item active" aria-current="page">@Model.Name</li>
-      </ol>
-    </nav>
-</section>
-<section class="container">
+<section class="container"> 
+    <partial name="../Organization/Shared/_Greeting.cshtml" for="@Model" />
+</section><section class="container">
     <ul class="nav nav-tabs">
         <li class="nav-item">
-            <a class="nav-link active" aria-current="page" href="#">Posts</a>
+            <a class="nav-link active" asp-action="Index" asp-controller="Organization" asp-route-id="@Model.Id">Posts</a>
         </li>
         <li class="nav-item">
-            <a class="nav-link" href="/Organization/UserManagement/@Model.Id">User Management</a>
+            <a class="nav-link" asp-action="UserManagement" asp-controller="Organization" asp-route-id="@Model.Id">User Management</a>
         </li>
         <li class="nav-item">
             <a class="nav-link" asp-action="Customers" asp-controller="Organization" asp-route-id="@Model.Id">Customers</a>
@@ -41,10 +26,30 @@
 <section class="container">
     <div class="row">
         <div class="col">
-            <partial name="_OrgPost" model="Model"/>
+            <partial name="../Organization/Shared/_OrgPost.cshtml" for="@Model" />
+            @*<partial name="_OrgPost" model="Model"/>*@
         </div>
         <div class="col">
-            <a class="btn btn-primary" asp-controller="Twitter" asp-action="Login" asp-route-id="@Model.Id">Use Twitter</a>
+            <section class="container pt-2 ml-0">
+                <partial name="../Organization/Shared/_Qr.cshtml" for="@Model" />
+            </section>
+            <section class="container pt-2">
+                <p class="fs-2">Your Services</p>
+            </section>
+            <section class="container">
+                <div class="row pb-1">
+                    <div class="col col-auto">
+                        <a class="btn btn-primary btn-lg" asp-controller="Twitter" asp-action="Login" asp-route-id="@Model.Id">
+                            <i class="fa-brands fa-square-twitter"></i>
+                            Use Twitter</a>
+                    </div>
+                    <div class="col col-auto">
+                        <a class="btn btn-danger btn-lg" asp-controller="Twitter" asp-action="Disable" asp-route-id="@Model.Id">
+                            <i class="fa-solid fa-square-minus"></i>
+                            Disable Twitter</a>
+                    </div>
+                </div>
+            </section>
         </div>
     </div>
 </section>

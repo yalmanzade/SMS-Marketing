@@ -1,8 +1,15 @@
-﻿@*
-    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
-*@
-@{
+﻿@{
+    ViewData["Title"] = "Connect to Twitter";
 }
 <div>
-    <a href="/Twitter/Login"></a>
+    <div class="px-4 py-5 my-5 text-center">
+        <i class="fa-solid fa-hashtag fs-1"></i>
+        <h1 class="display-5 fw-bold">Connect to Twitter</h1>
+        <div class="col-lg-6 mx-auto">
+            <p class="lead mb-4">Connect your organization to twitter and post to Twitter.</p>
+            <div class="d-grid gap-2 d-sm-flex justify-content-sm-center">
+                <a asp-action="MyOrganizations" asp-controller="Organization" type="button" class="btn btn-primary btn-lg px-4 gap-3">Connect Now</a>
+            </div>
+        </div>
+    </div>
 </div>

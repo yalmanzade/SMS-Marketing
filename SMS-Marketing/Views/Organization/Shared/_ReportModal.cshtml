@@ -1,0 +1,80 @@
+﻿<!-- Button trigger modal -->
+<button type="button" class="btn btn-primary btn-lg" data-bs-toggle="modal" data-bs-target="#reportModal">
+    <i class="fa-solid fa-chart-simple"></i>
+    View Report
+</button>
+
+<!-- Modal -->
+<div class="modal fade" id="reportModal" tabindex="-1" aria-labelledby="reportModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="reportModalLabel">Report Summary</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                @{
+                    if(Model == null || Model.Count < 1)
+                    {
+                        <p>There are no recent posts.</p>
+                    }else{
+                        <p class="fs-2">Recent Posts</p>
+                         <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th scope="auto">Date</th>
+                                    <th scope="auto">Author</th>
+                                    <th scope="auto">Posted to</th>
+                                    <th scope="auto">Success</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @{
+                                    foreach (var post in Model)
+                                    {
+                                        <tr>
+                                            <td>@post.PostedDate</td>
+                                            <td>@post.AuthorName</td>
+                                            <td>
+                                                @{
+                                                    if (post.OnTwitter)
+                                                    {
+                                                        <i class="fa-brands fa-twitter"></i>
+                                                        
+                                                    }
+                                                    if (post.OnFacebook)
+                                                    {
+                                                        <i class="fa-brands fa-facebook-f"></i>
+                                                    }
+                                                    if (post.OnSMS)
+                                                    {
+                                                        <i class="fa-solid fa-comment"></i>
+                                                    }
+                                                }
+                                            </td>
+                                            <td>
+                                                @{
+                                                    if (post.Success)
+                                                    {
+                                                        <i class="fa-regular fa-circle-check"></i>
+                                                    }
+                                                    else
+                                                    {
+                                                        <i class="fa-solid fa-circle-xmark"></i>
+                                                    }
+                                                }
+                                            </td>
+                                        </tr>
+                                    }
+                                }
+                            </tbody>
+                         </table>
+                    }
+                }
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
