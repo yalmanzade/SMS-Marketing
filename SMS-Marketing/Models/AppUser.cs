@@ -13,7 +13,7 @@ namespace SMS_Marketing.Models
         [MaxLength(100)]
         [DataType(DataType.Text)]
         public string LastName { get; set; } = string.Empty;
-        public string OrganizationId { get; set; } = string.Empty;
+        public int OrganizationId { get; set; }
         public bool IsActive { get; set; } = false;
         public bool IsPost { get; set; } = false;
         public bool IsUserManagement { get; set; } = false;
