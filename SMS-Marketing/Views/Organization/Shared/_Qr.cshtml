@@ -1,0 +1,30 @@
+﻿@model Organization
+@{
+    if (Model != null)
+    {
+        <section>
+            <p class="fs-2">Onboard Customers</p>
+            <p class="fs-5">Use this QR code to onboard customers.</p>
+            @{
+                string size = ";size=100x100";
+                string url = $"https://api.qrserver.com/v1/create-qr-code/?data={Model.SharingUrl}";
+                //<img src="@url" alt="sharing url" class="img-fluid" height="200" width="200" />
+            }
+            <div>
+                <p>QR Code Goes Here :)</p>
+            </div>
+            <p class="fs-2 mt-2">Shareable Link</p>
+            <p class="fs-5">Use this link to onboard customers.</p>
+            <div class="row">
+                <div class="col">
+                    <input type="text" class="form-control" id="shareablelink" disabled value="@Model.SharingUrl">
+                </div>
+                <div class="col col-auto">
+                    <button class="btn btn-primary" onclick="CopyToClipboard();">
+                    <i class="fa-solid fa-clipboard"></i>
+                    Copy Link</button>
+                </div>
+            </div>
+        </section>
+    }
+}

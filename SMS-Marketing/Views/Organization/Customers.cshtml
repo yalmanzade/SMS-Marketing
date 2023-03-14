@@ -3,6 +3,9 @@
     ViewData["Title"] = "Customers";
 }
 <section class="container">
+    <partial name="../Organization/Shared/_Greeting.cshtml" for="@Model.Organization" />
+</section>
+<section class="container">
     <ul class="nav nav-tabs">
         <li class="nav-item">
             <a class="nav-link" asp-action="Index" asp-controller="Organization" asp-route-id="@Model.Organization.Id">Posts</a>
@@ -14,14 +17,19 @@
             <a class="nav-link active" asp-action="Customers" asp-controller="Organization" asp-route-id="@Model.Organization.Id">Customers</a>
         </li>
         <li class="nav-item">
-            <a class="nav-link" href="#">Insights</a>
+            <a class="nav-link" asp-action="Groups" asp-controller="Organization" asp-route-id="@Model.Organization.Id">Groups</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" asp-action="Insights" asp-controller="Organization" asp-route-id="@Model.Organization.Id">Insights</a>
         </li>
     </ul>
 </section>
 <section class="container">
     <div class="row">
         <div class="col">
-            <h1>Customer List</h1>
+            <div class="pt-2">
+                <p class="fs-2">Customer List</p>
+            </div>
             <table class="table table-hover table-light">
                 <thead>
                     <tr>
@@ -49,7 +57,9 @@
             </table>
         </div>
         <div class="col">
-            <h1>Your groups</h1>
+            <div class="pt-2">
+                <p class="fs-2">Your Groups</p>
+            </div>
             <table class="table table-hover table-light">
                 <thead>
                     <tr>
