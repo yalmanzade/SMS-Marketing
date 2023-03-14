@@ -1,0 +1,45 @@
+﻿@{
+    ViewData["Title"] = "Insights";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<section class="container">
+    <div class="pt-2">
+        <p class="fs-1">System Insights</p>
+    </div>
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a asp-action="Index">Home</a></li>
+            <li class="breadcrumb-item active" aria-current="page">Insights</li>
+        </ol>
+    </nav>
+</section>
+<section class="container">
+    <ul class="nav nav-tabs">
+        <li class="nav-item">
+            <a asp-action="Index" asp-controller="SysAdmin" class="nav-link" aria-current="page">Organizations</a>
+        </li>
+        <li class="nav-item">
+            <a asp-action="Insights" class="nav-link active">Insights</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" href="/SysAdmin/Settings/Twitter">Settings</a>
+        </li>        
+    </ul>
+</section>
+
+<section class="container">
+    <div class="row">
+        <div class="col">
+            <div class="pt-2">
+                <p class="fs-2">System Logs</p>
+                <p class="fs-5">The system logs contain information to help you troubleshoot errors.</p>
+            </div>
+            <div>
+                <a asp-action="DownloadLogs" asp-controller="SysAdmin" class="btn btn-primary btn-lg">
+                    <i class="fa-solid fa-download"></i>
+                    Download Logs</a>
+            </div>
+        </div>
+        <div class="col"></div>
+    </div>
+</section>

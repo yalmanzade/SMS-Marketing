@@ -252,6 +252,40 @@ namespace SMSMarketing.Data.Migrations
                     b.ToTable("AppSettings");
                 });
 
+            modelBuilder.Entity("SMS_Marketing.Models.Authorization", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsCustomerManagment")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsInsight")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsPost")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsUserManagement")
+                        .HasColumnType("bit");
+
+                    b.Property<int>("OrganizationId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Authorization");
+                });
+
             modelBuilder.Entity("SMS_Marketing.Models.Customer", b =>
                 {
                     b.Property<int>("Id")
@@ -264,6 +298,10 @@ namespace SMSMarketing.Data.Migrations
                         .IsRequired()
                         .HasMaxLength(30)
                         .HasColumnType("nvarchar(30)");
+
+                    b.Property<string>("Email")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<int>("GroupId")
                         .HasColumnType("int");
@@ -337,6 +375,9 @@ namespace SMSMarketing.Data.Migrations
                         .HasMaxLength(20)
                         .HasColumnType("nvarchar(20)");
 
+                    b.Property<bool>("IsDefault")
+                        .HasColumnType("bit");
+
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(20)
@@ -348,6 +389,47 @@ namespace SMSMarketing.Data.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Groups");
+                });
+
+            modelBuilder.Entity("SMS_Marketing.Models.Invite", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("AcceptedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("AuthorId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("AuthorName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("InvitingOrganizationId")
+                        .HasColumnType("int");
+
+                    b.Property<bool>("IsAccepted")
+                        .HasColumnType("bit");
+
+                    b.Property<DateTime>("SentDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("TargetEmail")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("TargetUserId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Invites");
                 });
 
             modelBuilder.Entity("SMS_Marketing.Models.Organization", b =>
@@ -393,6 +475,49 @@ namespace SMSMarketing.Data.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Organizations");
+                });
+
+            modelBuilder.Entity("SMS_Marketing.Models.Post", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("AuthorId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("AuthorName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("OnFacebook")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("OnSMS")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("OnTwitter")
+                        .HasColumnType("bit");
+
+                    b.Property<int>("OrganizationId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("OrganizationName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("PostedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("Success")
+                        .HasColumnType("bit");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Posts");
                 });
 
             modelBuilder.Entity("SMS_Marketing.Models.TwilioAuth", b =>

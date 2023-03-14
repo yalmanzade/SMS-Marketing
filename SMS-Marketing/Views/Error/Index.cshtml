@@ -1,16 +1,38 @@
 ﻿@model UserErrorModel
 @{
+    ViewData["Title"] = "Something Went Wrong";
+    Layout = "~/Views/Share/Shared/_SharedLayout.cshtml";
+}
+@{
     if(Model != null)
     {
-        <section class="container">
-            <h1>There has been an error.</h1>
-            <h2>Error Code: @Model.ErrorCode</h2>
-            <h2>Error Details</h2>
-            <p>@Model.ErrorMessage</p>
+        <section>
+            <div class="px-4 py-5 my-5 text-center">
+                <i class="fa-solid fa-triangle-exclamation fs-1"></i>
+                <h1 class="display-5 fw-bold">Something Went Wrong</h1>
+                <p class="fs-3 p-2">@Model.ErrorMessage</p>
+                <div class="col-lg-6 mx-auto">
+                    <p class="lead mb-4">Please contact the system admin for more details.</p>
+                    <div class="d-grid gap-2 d-sm-flex justify-content-sm-center">
+                        @*<a class="btn btn-primary btn-lg px-4 gap-3">Subscribe again</a>*@
+                    </div>
+                </div>
+            </div>
         </section>
     }
     else
     {
-        <p>Something Unexpected Has Happened.</p>
+        <section>
+            <div class="px-4 py-5 my-5 text-center">
+                <i class="fa-solid fa-triangle-exclamation fs-1"></i>
+                <h1 class="display-5 fw-bold">Something Went Wrong</h1>
+                <div class="col-lg-6 mx-auto">
+                    <p class="lead mb-4">Please contact the system admin for more details.</p>
+                    <div class="d-grid gap-2 d-sm-flex justify-content-sm-center">
+                        @*<a class="btn btn-primary btn-lg px-4 gap-3">Subscribe again</a>*@
+                    </div>
+                </div>
+            </div>
+        </section>
     }
 }

@@ -22,6 +22,18 @@ public class Organization
     public bool IsFacebook { get; set; } = false;
     [NotMapped]
     public List<Group>? Groups { get; set; }
+    [NotMapped]
+    public List<AppUser>? AppUsers { get; set; }
+    [NotMapped]
+    public List<Post> RecentPosts = new();
+    [NotMapped]
+    public string SharingUrl
+    {
+        get
+        {
+            return $"https://localhost:7076/Share/Index/{this.Id.ToString()}";
+        }
+    }
 }
 public class CustomerViewModel
 {

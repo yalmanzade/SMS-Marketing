@@ -3,25 +3,48 @@
     ViewData["Title"] = "Settings";
 }
 <section class="container">
+    <div class="pt-2">
+        <p class="fs-1">System Settings</p>
+    </div>
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a asp-action="Index">Home</a></li>
+            <li class="breadcrumb-item active" aria-current="page">Insights</li>
+        </ol>
+    </nav>
+</section>
+<section class="container">
     <ul class="nav nav-tabs">
         <li class="nav-item">
             <a class="nav-link" asp-action="Index" asp-controller="SysAdmin">Organizations</a>
         </li>
         <li class="nav-item">
-            <a class="nav-link" href="#">Insights</a>
+            <a class="nav-link" asp-action="Insights">Insights</a>
         </li>  <li class="nav-item">
             <a class="nav-link active" aria-current="page" href="/SysAdmin/Settings/Twitter">Settings</a>
         </li>        
     </ul>
 </section>
-<section class="container mt-4 mb-5">
-    <div class="row">
-        <div class="col-3">
-            <partial name="../SysAdmin/AdminSettings/_SettingsMenu" />
-        </div>
-        <div class="col-8">
-            <partial name="../SysAdmin/AdminSettings/_SettingsForm.cshtml" for="@Model"/>
-            @*@Html.Partial("../SysAdmin/AdminSettings/_Twitter.cshtml")*@
-        </div>
-    </div>
-</section>
+@{
+    if(Model == null)
+    {
+        <section class="container mt-4 mb-5">
+            <p>There are no loaded settings</p>
+        </section>
+    }
+    else
+    {
+        <section class="container">
+            <div class="row">
+                <div class="col-3 mt-4 mb-5">
+                    <partial name="../SysAdmin/AdminSettings/_SettingsMenu" />
+                </div>
+                <div class="col-8 mt-3">
+                    <partial name="../SysAdmin/AdminSettings/_SettingsForm.cshtml" for="@Model" />
+                    @*@Html.Partial("../SysAdmin/AdminSettings/_Twitter.cshtml")*@
+                </div>
+            </div>
+        </section>
+
+    }
+}

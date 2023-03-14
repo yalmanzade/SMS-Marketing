@@ -1,5 +1,7 @@
 ﻿@model List<AppSettings>
-
+<section class="container pt-2">
+    <p class="fs-2">@Model[0].SettingGroup SETTINGS</p>
+</section>
 <section class="container">
     @{
         foreach (var item in Model)
@@ -13,7 +15,7 @@
                     <label for="@item.Name.ToString()" class="form-label">@item.Name</label>
                     <input name="setting" type="text" class="form-control" asp-asp-for="@item.Name.ToString()" value="@item.Value" />
                 </div>
-                <input type="submit" class="btn btn-primary mt-2" value="Save"/>
+                <input type="submit" class="btn btn-primary mt-2 btn-lg" value="Save"/>
             </form>
         }
     }

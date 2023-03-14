@@ -1,26 +1,26 @@
 ﻿<section>
     @{
-        if (ViewBag.Success != null)
+        if (TempData["Success"] != null)
         {
            <div class="row">
                <div class="col-12">
                    <div class="alert alert-success" role="alert">
-                        @ViewBag.Success
+                        @TempData["Success"]
                    </div>
                </div>
            </div>
-            ViewBag.Success = null;
+            TempData["Success"] = null;
         }
-        if (ViewBag.Error != null)
+        if (TempData["Error"] != null)
         {
             <div class="row">
                 <div class="col-12">
                     <div class="alert alert-danger" role="alert">
-                        @ViewBag.Error
+                        @TempData["Error"]
                     </div>
                 </div>
             </div>
-            ViewBag.Error = null;
+            TempData["Error"] = null;
         }
     }
 </section>
