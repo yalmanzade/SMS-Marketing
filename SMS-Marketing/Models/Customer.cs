@@ -12,16 +12,18 @@ namespace SMS_Marketing.Models
         [DataType(DataType.Text)]
         [StringLength(20)]
         public string? GroupName { get; set; } = string.Empty;
+        [Required]
         [DataType(DataType.Text)]
-        [StringLength(20)]
-        public string Name { get; set; } = string.Empty;
+        [StringLength(30)]
+        public string Name { get; set; }
+        [Required]
         [DataType(DataType.Text)]
-        [StringLength(20)]
-        public string LastName { get; set; } = string.Empty;
+        [StringLength(30)]
+        public string LastName { get; set; }
         [Required]
         [StringLength(12)]
         [DataType(DataType.Text)]
-        public string PhoneNumber { get; set; } = string.Empty;
+        public string PhoneNumber { get; set; }
         public bool IsActive { get; set; } = true;
     }
 }

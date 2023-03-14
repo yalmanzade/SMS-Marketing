@@ -81,8 +81,13 @@ namespace SMS_Marketing.Controllers
             customer.Name = FName;
             customer.LastName = LName;
             customer.PhoneNumber = PNum;
-            _context.Customers.Add(customer);
-            _context.SaveChanges();
+            if (TryValidateModel(customer))
+            {
+                _context.Customers.Add(customer);
+                _context.SaveChanges();
+            }
+            if (!TryValidateModel(customer))
+                return RedirectToAction("Index", "Error");
             return RedirectToAction("Customers", "Organization", new { @id = id });
         }
         [HttpPost]
