@@ -1,6 +1,7 @@
 ﻿using LinqToTwitter;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using SMS_Marketing.API;
 using SMS_Marketing.Areas.Identity.Data;
 using SMS_Marketing.Data;
 using SMS_Marketing.Models;
@@ -27,7 +28,9 @@ namespace SMS_Marketing.Controllers
             _context = context;
             _authContext = authDbContext;
         }
+        
         #endregion
+
         // GET: OrganizationController
         public async Task<ActionResult> Index(int? id)
         {
@@ -210,70 +213,11 @@ namespace SMS_Marketing.Controllers
         {
             try
             {
-                FacebookAuth? facebookAuth = _context.FacebookAuth
-                                               .Where(x => x.OrganizationId == id)
-                                               .FirstOrDefault();
-
-                if (facebookAuth.AccessToken == null || facebookAuth.AppId == null) return false;
-                string accessToken = facebookAuth.AccessToken;
-                string pageId = facebookAuth.AppId;
-                //string accessToken = _context.AppSettings.First(p => p.Index == AppSettingsAccess.FacebookAccessToken).Value;
-                //string pageId = _context.AppSettings.First(p => p.Index == AppSettingsAccess.FacebookAppId).Value;
-                var url = $"https://graph.facebook.com/{pageId}/feed?access_token={accessToken}";
-
-                if (imageFile == null)
-                {
-                    var data = $"message={message}";
-                    var dataBytes = Encoding.UTF8.GetBytes(data);
-
-                    using (var client = new HttpClient())
-                    {
-                        var response = await client.PostAsync(url, new ByteArrayContent(dataBytes));
-
-                        if (response.IsSuccessStatusCode)
-                        {
-                            TempData["Success"] += "Post was successful.";
-                            return true;
-                        }
-                        else
-                        {
-                            TempData["Success"] += "Post was unsuccessful.";
-                            return false;
-                        }
-                    }
-                }
-                else
-                {
-                    url = $"https://graph.facebook.com/{pageId}/photos?access_token={accessToken}";
-
-                    using (var client = new HttpClient())
-                    {
-                        using (var content = new MultipartFormDataContent())
-                        {
-                            content.Add(new StringContent(message), "message");
-
-                            using (var stream = new MemoryStream())
-                            {
-                                await imageFile.CopyToAsync(stream);
-                                content.Add(new ByteArrayContent(stream.ToArray()), "source", imageFile.FileName);
-                            }
-
-                            var response = await client.PostAsync(url, content);
-
-                            if (response.IsSuccessStatusCode)
-                            {
-                                TempData["Success"] += "Post was successful.";
-                                return true;
-                            }
-                            else
-                            {
-                                TempData["Success"] += "Post was unsuccessful.";
-                                return false;
-                            }
-                        }
-                    }
-                }
-
+                string result;
+                FacebookAPI call = new FacebookAPI(_context, _authContext, _userManager, _signInManager);
+                result = await call.PostToFacebookImg(message, imageFile, id);
+                ViewData["Result"] = result;
+                return true;
             }
             catch (Exception ex)
             {
@@ -288,42 +232,16 @@ namespace SMS_Marketing.Controllers
         {
             try
             {
-                Models.TwilioAuth? twilioAuth = _context.TwilioAuth
-                                        .Where(x => x.Id == id)
-                                        .FirstOrDefault();
-                var authToken = "";
-                var accountSid = "";
-                if (authToken == null) return false;
-                if (accountSid == null) return false;
-                if (twilioAuth == null) return false;
-                List<Customer> customers = new List<Customer>();
-                customers = _context.Customers
-                            .Where(x => x.GroupId == id)
-                            .ToList();
-                TwilioClient.Init(accountSid, authToken);
-                if (customers == null) return false;
-                if (url != null)
+                string result;
+                TwilioAPI twilioAPI = new TwilioAPI(_context, _authContext, _userManager, _signInManager);
+                result = twilioAPI.PostToTwilio(url, body, id, smsGroup);
+                if (result == "false")
                 {
-                    foreach (var customer in customers)
-                    {
-                        var mediaUrl = new[] { new Uri(url) }.ToList();
-                        var message = MessageResource.Create(
-                        body: body,
-                        from: new Twilio.Types.PhoneNumber(twilioAuth.SendingNumber),
-                        mediaUrl: mediaUrl,
-                        to: new Twilio.Types.PhoneNumber(customer.PhoneNumber)
-                        );
-                        Console.WriteLine($"Message to {customer.PhoneNumber} has been {message.Status}.");
-                    }
+                    return false;
                 }
-                foreach (Customer customer in customers)
+                else if (result == "true")
                 {
-                    var message = MessageResource.Create(
-                                body: body,
-                                from: new Twilio.Types.PhoneNumber(twilioAuth.SendingNumber),
-                                to: new Twilio.Types.PhoneNumber(customer.PhoneNumber)
-                    );
-                    Console.WriteLine($"Message to {customer.PhoneNumber} has been {message.Status}.");
+                    return true;
                 }
             }
             catch (Exception ex)
@@ -500,14 +418,15 @@ namespace SMS_Marketing.Controllers
                 if (id != null)
                 {
                     var organization = await GetCurrentOrg(id);
-                    var users = _context.Customers
+                    var customers = _context.Customers
                                 .Where(x => x.OrganizationId == id)
                                 .ToList();
                     var group = _context.Groups
                                 .Where(x => x.OrganizationId == id)
                                 .ToList();
-                    CustomerViewModel customersViewModel = new CustomerViewModel(organization, group, users);
-                    return View(customersViewModel);
+
+                    CustomerViewModel customersViewModel = new CustomerViewModel(organization, group, customers);
+                    TempData["Success"] = "Customers Retrieved";
                 }
 
             }
