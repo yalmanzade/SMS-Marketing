@@ -5,9 +5,6 @@ using SMS_Marketing.API;
 using SMS_Marketing.Areas.Identity.Data;
 using SMS_Marketing.Data;
 using SMS_Marketing.Models;
-using System.Text;
-using Twilio;
-using Twilio.Rest.Api.V2010.Account;
 
 namespace SMS_Marketing.Controllers
 {
@@ -28,7 +25,7 @@ namespace SMS_Marketing.Controllers
             _context = context;
             _authContext = authDbContext;
         }
-        
+
         #endregion
 
         // GET: OrganizationController
@@ -427,6 +424,7 @@ namespace SMS_Marketing.Controllers
 
                     CustomerViewModel customersViewModel = new CustomerViewModel(organization, group, customers);
                     TempData["Success"] = "Customers Retrieved";
+                    return View(customersViewModel);
                 }
 
             }
