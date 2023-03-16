@@ -9,7 +9,8 @@ namespace TwilioReceive.Controllers
 	{
 		public TwiMLResult Index(SmsRequest incomingMessage)
 		{
-
+			string number = incomingMessage.From;
+			string sendingnum = incomingMessage.To;
 			string subscribeMessage = "Flat";
 			string orgName = "Flat Earth News";
 			//check to see if number is in database
@@ -27,7 +28,7 @@ namespace TwilioReceive.Controllers
 			{
 				if (incomingMessage.Body == subscribeMessage)
 				{
-					messagingResponse.Message($"Thank You for subscribing to {orgName}. Please Tell us your Name in the format First, Last");
+					messagingResponse.Message($"Thank You {sendingnum} for subscribing to {orgName}. Please Tell us your Name in the format First, Last");
 					subscribed = true;//add num to database here
 					return TwiML(messagingResponse);
 				}
