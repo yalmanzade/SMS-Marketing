@@ -4,18 +4,26 @@
     ViewData["Title"] = "Join Today!";
 }
 <section class="container pt-2">
-    <p class="fs-2">Sign up for text updates</p>
+    <p class="fs-2">Sign up for text updates from @Model.Organization.Name .</p>
 </section>
 <section class="container p-3">
     <form asp-action="Subscribe" asp-controller="Share" asp-route-id="@Model.OrganizationId">
         @Html.HiddenFor(x => x.OrganizationId)
         <div class="mb-3">
-            <label asp-for="@Model.Name" class="form-label"></label>
-            <input asp-for="@Model.Name" class="form-control" required>
+            <div class="row">
+                <div class="col">
+                    <label asp-for="@Model.Name" class="form-label"></label>
+                    <input asp-for="@Model.Name" class="form-control" required>
+                </div>
+                <div class="col">
+                    <label asp-for="@Model.LastName" class="form-label"></label>
+                    <input asp-for="@Model.LastName" class="form-control" required>
+                </div>
+            </div>
         </div>
         <div class="mb-3">
             <label asp-for="@Model.PhoneNumber" class="form-label"></label>
-            <input asp-for="@Model.PhoneNumber" class="form-control" required>
+            <input asp-for="@Model.PhoneNumber" type="tel" class="form-control" required>
         </div>
         <div class="mb-3">
             <label asp-for="@Model.Email" class="form-label"></label>

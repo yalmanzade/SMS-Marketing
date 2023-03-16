@@ -292,6 +292,24 @@ namespace SMS_Marketing.Controllers
             return View();
         }
 
+        [ActionName("DownloadLog")]
+        public ActionResult DownloadLog()
+        {
+            try
+            {
+                string path = Directory.GetCurrentDirectory();
+                path += @"\Logs\";
+                byte[] file = System.IO.File.ReadAllBytes(path + "log.txt");
+                string filename = "logs.txt";
+                return File(file, System.Net.Mime.MediaTypeNames.Application.Octet, filename);
+
+            }
+            catch (Exception ex)
+            {
+                TempData["Error"] += ex.Message;
+                return RedirectToAction("Index", "Error");
+            }
+        }
         #endregion
 
         #region App Settings

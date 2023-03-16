@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace SMS_Marketing.Models
 {
@@ -18,11 +19,12 @@ namespace SMS_Marketing.Models
         [StringLength(20)]
         public string GroupName { get; set; } = string.Empty;
 
-        [DisplayName("Your Name")]
+        [DisplayName("First Name")]
         [DataType(DataType.Text)]
         [StringLength(20)]
         public string Name { get; set; } = string.Empty;
 
+        [DisplayName("Last Name")]
         [DataType(DataType.Text)]
         [StringLength(20)]
         public string LastName { get; set; } = string.Empty;
@@ -40,5 +42,8 @@ namespace SMS_Marketing.Models
         [StringLength(30)]
         [DataType(DataType.Text)]
         public string Description { get; set; } = string.Empty;
+
+        [NotMapped]
+        public Organization Organization { get; set; } = new();
     }
 }

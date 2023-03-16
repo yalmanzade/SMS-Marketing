@@ -160,8 +160,6 @@ namespace SMS_Marketing.Controllers
                 post.AuthorId = appUser.Id;
                 post.AuthorName = $"{appUser.FirstName} {appUser.LastName}";
                 post.Success = true;
-                post.OnFacebook = true;
-                post.OnSMS = true;
                 await LogPost(post);
             }
             catch (Exception ex)
@@ -397,7 +395,6 @@ namespace SMS_Marketing.Controllers
         [ActionName("AddUser")]
         public async Task<ActionResult> AddUser(int? id, string? email)
         {
-            //int id = 1;
             try
             {
                 if (email == null) throw new Exception("Bad Input");
@@ -412,7 +409,6 @@ namespace SMS_Marketing.Controllers
                 invite.AuthorName = $"{currentUser.FirstName} {currentUser.LastName}";
                 invite.TargetUserId = targetUser.Id;
                 invite.TargetEmail = email;
-                ViewData["Success"] += $"Invite was sent to {email}.";
                 var currentOrganization = await GetCurrentOrg(id);
                 if (currentOrganization == null) throw new Exception("We could not retrieve your data.");
                 invite.InvitingOrganizationId = currentOrganization.Id;
@@ -596,16 +592,6 @@ namespace SMS_Marketing.Controllers
             List<AppUser> appUsers = new();
             try
             {
-                //appUsers = _context.Users
-                //    .Join(
-                //        _context.Authorization,
-                //        user => user.Id,
-                //        auth => auth.UserId,
-                //        (user, auth) => new
-                //        {
-
-                //        } 
-                //    ).Tolist();
                 appUsers = _authContext.Users
                             .Where(u => u.OrganizationId == id)
                             .ToList();

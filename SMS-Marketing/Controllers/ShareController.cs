@@ -46,6 +46,7 @@ namespace SMS_Marketing.Controllers
                 Customer customer = new()
                 {
                     OrganizationId = organization.Id,
+                    Organization = organization
                 };
                 return View(customer);
             }
@@ -60,27 +61,41 @@ namespace SMS_Marketing.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
         [ActionName("Subscribe")]
-        public async Task<ActionResult> Subscribe(Customer customer)
+        public async Task<ActionResult> Subscribe(Customer customerForm)
         {
             try
             {
-                if (customer == null) throw new Exception("Invalid Data. Please try again.");
+                if (customerForm == null) throw new Exception("Invalid Data. Please try again.");
                 if (ModelState.IsValid)
                 {
-                    var prefix = customer.PhoneNumber.Substring(0, 1);
+                    var prefix = customerForm.PhoneNumber.Substring(0, 1);
                     if (prefix != "+1")
                     {
-                        customer.PhoneNumber = "+1" + customer.PhoneNumber;
+                        customerForm.PhoneNumber = "+1" + customerForm.PhoneNumber;
                     }
-                    if (PhoneIsValid(customer.PhoneNumber) == false) throw new Exception("Invalid Phone Number.");
+                    if (PhoneIsValid(customerForm.PhoneNumber) == false) throw new Exception("Invalid Phone Number.");
+
+                    //Checks if user already exists.
+                    Customer? customer = await _context.Customers.FirstOrDefaultAsync(
+                        x => x.PhoneNumber == customerForm.PhoneNumber && x.OrganizationId == customerForm.Id);
+                    if (customer != null) return View("SubscribeSuccess");
+
                     Models.Group? group = _context.Groups
-                                   .Where(g => g.OrganizationId == customer.Id && g.IsDefault == true)
+                                   .Where(g => g.OrganizationId == customerForm.Id && g.IsDefault == true)
                                    .FirstOrDefault();
                     if (group == null) throw new Exception("Invalid Data. Please try again.");
-                    customer.GroupId = group.Id;
-                    customer.Name = group.Name;
-                    //await _authContext.AddAsync(customer);
-                    //_context.SaveChanges();
+                    Customer newCustomer = new()
+                    {
+                        OrganizationId = customerForm.Id,
+                        Name = customerForm.Name,
+                        LastName = customerForm.LastName,
+                        GroupId = group.Id,
+                        GroupName = group.Name,
+                        PhoneNumber = customerForm.PhoneNumber,
+                        Email = customerForm.Email
+                    };
+                    await _context.AddAsync(newCustomer);
+                    await _context.SaveChangesAsync();
                     return View("SubscribeSuccess");
                 }
             }
@@ -166,7 +181,9 @@ namespace SMS_Marketing.Controllers
         #region Helper Methods
         public bool PhoneIsValid(string phone)
         {
-            const string bluePrint = "^([\\+]?1[-]?|[0])?[1-9][0-9]{8}$";
+            //const string bluePrint = "^([\\+]?1[-]?|[0])?[1-9][0-9]{8}$";
+            const string bluePrint = @"^\(?([0-9]{3})\)?[-. ]?([0-9]{3})[-. ]?([0-9]{4})$";
+            return true;
             return Regex.IsMatch(phone, bluePrint);
         }
         #endregion
