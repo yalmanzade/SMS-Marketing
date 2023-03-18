@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace SMS_Marketing.Models
 {
@@ -14,12 +15,20 @@ namespace SMS_Marketing.Models
         public int GroupId { get; set; } = 0;
         [DataType(DataType.Text)]
         [StringLength(20)]
+
         public string? GroupName { get; set; } = string.Empty;
         [Required]
         [DataType(DataType.Text)]
         [StringLength(30)]
         public string Name { get; set; }
         [Required]
+
+        [DisplayName("First Name")]
+        [DataType(DataType.Text)]
+        [StringLength(20)]
+        public string Name { get; set; } = string.Empty;
+
+        [DisplayName("Last Name")]
         [DataType(DataType.Text)]
         [StringLength(30)]
         public string LastName { get; set; }
@@ -29,5 +38,9 @@ namespace SMS_Marketing.Models
         [DataType(DataType.Text)]
         public string PhoneNumber { get; set; }
         public bool IsActive { get; set; } = true;
+
+
+        [NotMapped]
+        public Organization Organization { get; set; } = new();
     }
 }
