@@ -12,12 +12,16 @@ namespace SMS_Marketing.Models
         [Required]
         public int OrganizationId { get; set; }
 
-        [Required]
-        public int GroupId { get; set; }
-
+        public int GroupId { get; set; } = 0;
         [DataType(DataType.Text)]
         [StringLength(20)]
-        public string GroupName { get; set; } = string.Empty;
+
+        public string? GroupName { get; set; } = string.Empty;
+        [Required]
+        [DataType(DataType.Text)]
+        [StringLength(30)]
+        public string Name { get; set; }
+        [Required]
 
         [DisplayName("First Name")]
         [DataType(DataType.Text)]
@@ -26,22 +30,15 @@ namespace SMS_Marketing.Models
 
         [DisplayName("Last Name")]
         [DataType(DataType.Text)]
-        [StringLength(20)]
-        public string LastName { get; set; } = string.Empty;
-
+        [StringLength(30)]
+        public string LastName { get; set; }
         [Required]
         [DisplayName("Phone Number")]
         [StringLength(12)]
-        [DataType(DataType.PhoneNumber)]
-        public string PhoneNumber { get; set; } = string.Empty;
-
-        [DisplayName("Email Address")]
-        [DataType(DataType.EmailAddress)]
-        public string Email { get; set; } = string.Empty;
-
-        [StringLength(30)]
         [DataType(DataType.Text)]
-        public string Description { get; set; } = string.Empty;
+        public string PhoneNumber { get; set; }
+        public bool IsActive { get; set; } = true;
+
 
         [NotMapped]
         public Organization Organization { get; set; } = new();
