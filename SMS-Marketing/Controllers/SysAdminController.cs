@@ -289,6 +289,7 @@ namespace SMS_Marketing.Controllers
 
         public ActionResult Insights()
         {
+            ViewBag.PostList = _context.Posts.ToList();
             return View();
         }
 
