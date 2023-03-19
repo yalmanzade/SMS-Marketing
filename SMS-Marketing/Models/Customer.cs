@@ -26,7 +26,7 @@ namespace SMS_Marketing.Models
         [DisplayName("First Name")]
         [DataType(DataType.Text)]
         [StringLength(20)]
-        public string Name { get; set; } = string.Empty;
+        public string FirstName { get; set; } = string.Empty;
 
         [DisplayName("Last Name")]
         [DataType(DataType.Text)]
