@@ -17,10 +17,10 @@ namespace SMS_Marketing.Models
         [StringLength(20)]
 
         public string? GroupName { get; set; } = string.Empty;
-        [Required]
-        [DataType(DataType.Text)]
-        [StringLength(30)]
-        public string Name { get; set; }
+        //[Required]
+        //[DataType(DataType.Text)]
+        //[StringLength(30)]
+        //public string Name { get; set; }
         [Required]
 
         [DisplayName("First Name")]

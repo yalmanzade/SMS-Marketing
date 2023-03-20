@@ -92,7 +92,7 @@ namespace SMS_Marketing.Controllers
                         GroupId = group.Id,
                         GroupName = group.Name,
                         PhoneNumber = customerForm.PhoneNumber,
-                        Email = customerForm.Email
+                        //Email = customerForm.Email
                     };
                     await _context.AddAsync(newCustomer);
                     await _context.SaveChangesAsync();
