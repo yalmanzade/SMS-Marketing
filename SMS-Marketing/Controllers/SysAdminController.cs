@@ -44,6 +44,8 @@ namespace SMS_Marketing.Controllers
             }
             catch (Exception ex)
             {
+                Error.InitializeError("Admin Index", "200", ex.Message);
+                Error.LogError();
                 TempData["Error"] = ex.Message;
                 return RedirectToAction("Index", "Error");
             }

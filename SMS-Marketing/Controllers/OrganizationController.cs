@@ -1,6 +1,7 @@
 ﻿using LinqToTwitter;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.IdentityModel.Tokens;
 using SMS_Marketing.API;
 using SMS_Marketing.Areas.Identity.Data;
 using SMS_Marketing.Data;
@@ -36,6 +37,7 @@ namespace SMS_Marketing.Controllers
             {
                 organization = await GetCurrentOrg(id);
                 organization.Groups = GetGroups(id);
+                organization.CurrentUser = await GetCurrentUser();
             }
             catch (Exception ex)
             {
@@ -318,14 +320,28 @@ namespace SMS_Marketing.Controllers
                     .ToList().FirstOrDefault();
                 if (targetUser == null) throw new Exception("User does not exist.");
                 var currentUser = await GetCurrentUser();
-                if (targetUser == null) throw new Exception("User does not exist.");
+                if (currentUser == null) throw new Exception("User does not exist.");
+                var currentOrganization = await GetCurrentOrg(id);
+                if (currentOrganization == null) throw new Exception("We could not retrieve your data.");
+
+                //Checks if invite already exists
+                var currentInvites = _context.Invites
+                            .Where(x => x.InvitingOrganizationId == currentOrganization.Id
+                                    && x.TargetEmail == email).ToList();
+                if (!currentInvites.IsNullOrEmpty())
+                {
+                    TempData["Success"] = $"An invite was already sent to {email}";
+                    return RedirectToAction("UserManagement", new { id = id });
+                }
+
+                //Else
+
                 Invite invite = new();
                 invite.AuthorId = currentUser.Id;
                 invite.AuthorName = $"{currentUser.FirstName} {currentUser.LastName}";
                 invite.TargetUserId = targetUser.Id;
                 invite.TargetEmail = email;
-                var currentOrganization = await GetCurrentOrg(id);
-                if (currentOrganization == null) throw new Exception("We could not retrieve your data.");
+
                 invite.InvitingOrganizationId = currentOrganization.Id;
                 await _context.Invites.AddAsync(invite);
                 TempData["Success"] += $"Invite was sent to {email}";
@@ -352,13 +368,22 @@ namespace SMS_Marketing.Controllers
                 if (id == null) throw new Exception("Invalid User Id");
                 AppUser? targetUser = await _authContext.Users.FindAsync(id);
                 if (targetUser == null) throw new Exception("Could not find user.");
+                var activeCondition = targetUser.IsActive;
                 targetUser.IsActive = collection["user.IsActive"][0] == "true" ? true : false;
                 if (!targetUser.IsActive)
                 {
                     targetUser.ResetPermissions();
                     _authContext.Users.Update(targetUser);
                     await _authContext.SaveChangesAsync();
-                    TempData["Success"] = $"{targetUser.FirstName} was disabeled.";
+                    TempData["Success"] = $"{targetUser.FirstName} was disabled.";
+                    return RedirectToAction("UserManagement", new { id = orgId });
+                }
+                else if (targetUser.IsActive && activeCondition == false)
+                {
+                    targetUser.IsActive = true;
+                    _authContext.Users.Update(targetUser);
+                    await _authContext.SaveChangesAsync();
+                    TempData["Success"] = $"{targetUser.FirstName} was enabled.";
                     return RedirectToAction("UserManagement", new { id = orgId });
                 }
                 targetUser.IsPost = collection["user.IsPost"][0] == "true" ? true : false;

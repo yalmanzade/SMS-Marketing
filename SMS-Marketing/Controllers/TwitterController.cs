@@ -35,11 +35,15 @@ namespace SMS_Marketing.Controllers
         }
 
         #region User Authentication
+        public ActionResult Login(int? id)
+        {
+            return RedirectToAction("LoginTwitter", new { @id = id });
+        }
 
-        //POST: TwitterController/Login/
-        [ActionName("Login")]
-        [ValidateAntiForgeryToken]
-        public async Task<ActionResult> Login(int? id)
+        //GET: TwitterController/Login/3
+        [ActionName("LoginTwitter")]
+        //[ValidateAntiForgeryToken]
+        public async Task<ActionResult> LoginTwitter(int? id)
         {
             try
             {
@@ -93,10 +97,12 @@ namespace SMS_Marketing.Controllers
             }
             catch (Exception ex)
             {
-                ViewBag.Error = ex.Message;
-                return View();
+                Error.InitializeError("Twitter Authentication", id.ToString(), ex.Message);
+                Error.LogError();
+                TempData["Error"] = ex.Message;
+                return RedirectToAction("Index", "Error");
             }
-            ViewBag.Error = "There has been an unidentified error";
+            TempData["Error"] = "There has been an unidentified error.";
             return View("Index");
         }
 
@@ -104,7 +110,7 @@ namespace SMS_Marketing.Controllers
         {
             try
             {
-                Organization organization = await _context.Organizations.FindAsync(organizationId);
+                Organization? organization = await _context.Organizations.FindAsync(organizationId);
                 if (organization != null)
                 {
                     _context.Organizations.Update(organization);
@@ -117,8 +123,10 @@ namespace SMS_Marketing.Controllers
             }
             catch (Exception ex)
             {
-                ViewBag.Error = ex.Message;
-                return RedirectToAction("Organization/" + organizationId);
+                Error.InitializeError("Save Twitter Credentials.", $"Org Id: {organizationId}", ex.Message);
+                Error.LogError();
+                TempData["Error"] = ex.Message;
+                return RedirectToAction("Index", "Error");
             }
             return RedirectToAction("Organization/" + organizationId);
         }
@@ -153,7 +161,9 @@ namespace SMS_Marketing.Controllers
             }
             catch (Exception ex)
             {
-                ViewBag.Error = ex.Message;
+                Error.InitializeError("Save Twitter Credentials.", $"Org Id: {id}", ex.Message);
+                Error.LogError();
+                TempData["Error"] = ex.Message;
             }
             return organization;
         }
@@ -196,11 +206,14 @@ namespace SMS_Marketing.Controllers
                     //string screenname = credentials.ScreenName;
                     //ulong userid = credentials.UserID;
                 }
-                ViewBag.Success = "Saved Twitter Credentials";
+                TempData["Success"] = "Saved Twitter Credentials.";
             }
             catch (Exception ex)
             {
-                ViewBag.ErrorMessage = ex.Message;
+                Error.InitializeError("Twitter Authentication", id.ToString(), ex.Message);
+                Error.LogError();
+                TempData["Error"] = ex.Message;
+                return RedirectToAction("Index", "Error");
             }
             return View();
         }
@@ -238,8 +251,10 @@ namespace SMS_Marketing.Controllers
                 }
                 catch (Exception ex)
                 {
-                    ViewBag.Result = ex.Message;
-                    Console.WriteLine(ex.Message);
+                    Error.InitializeError("Twitter Posting", "No Org Id", ex.Message);
+                    Error.LogError();
+                    TempData["Error"] = ex.Message;
+                    return RedirectToAction("Index", "Error");
                 }
 
             }
