@@ -13,7 +13,7 @@ namespace SMS_Marketing.Models
         [StringLength(20)]
         public string Name { get; set; } = string.Empty;
         [DataType(DataType.Text)]
-        [StringLength(20)]
+        [StringLength(50)]
         public string Description { get; set; } = string.Empty;
         [Required]
         public bool IsDefault { get; set; } = false;
