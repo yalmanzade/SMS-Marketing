@@ -102,7 +102,7 @@ namespace SMS_Marketing.Controllers
                     organization.ManagerId = organizationManager.Id;
                     organization.ManagerName = $"{organizationManager.FirstName} {organizationManager.LastName}";
                     await _context.Organizations.AddAsync(organization);
-
+                    await _context.SaveChangesAsync();
                     //Set permissions for Organization Manager
                     organizationManager.SetOrgManagerPermissions();
                     _authContext.Users.Update(organizationManager);
@@ -112,7 +112,7 @@ namespace SMS_Marketing.Controllers
                     {
                         OrganizationId = organization.Id,
                         Name = "All Users",
-                        Description = "This group contains all users",
+                        Description = "Short",
                         IsDefault = true
                     };
                     await _context.Groups.AddAsync(group);

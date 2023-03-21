@@ -12,7 +12,7 @@ namespace SMS_Marketing.Models
         [Required]
         public int OrganizationId { get; set; }
 
-        public int GroupId { get; set; } = 0;
+        public int? GroupId { get; set; }
         [DataType(DataType.Text)]
         [StringLength(20)]
 
@@ -26,7 +26,7 @@ namespace SMS_Marketing.Models
         [DisplayName("First Name")]
         [DataType(DataType.Text)]
         [StringLength(20)]
-        public string Name { get; set; } = string.Empty;
+        public string FirstName { get; set; } = string.Empty;
 
         [DisplayName("Last Name")]
         [DataType(DataType.Text)]
@@ -39,8 +39,8 @@ namespace SMS_Marketing.Models
         public string PhoneNumber { get; set; }
         public bool IsActive { get; set; } = true;
 
-
+        
         [NotMapped]
-        public Organization Organization { get; set; } = new();
+        public Organization? Organization { get; set; }
     }
 }

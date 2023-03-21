@@ -87,7 +87,7 @@ namespace SMS_Marketing.Controllers
                     Customer newCustomer = new()
                     {
                         OrganizationId = customerForm.Id,
-                        Name = customerForm.Name,
+                        FirstName = customerForm.FirstName,
                         LastName = customerForm.LastName,
                         GroupId = group.Id,
                         GroupName = group.Name,
