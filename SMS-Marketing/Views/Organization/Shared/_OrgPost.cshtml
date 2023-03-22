@@ -2,7 +2,7 @@
     <p class="fs-2">Write a message</p>
 </section>
 <section class="container mb-5">
-    <form asp-controller="Organization" asp-action="SubmitPost">
+    <form asp-controller="Organization" asp-action="SubmitPost" method="post" enctype="multipart/form-data">
         <input name="id" type="hidden" value="@Model.Id" />
         <div class="input-group mt-3">
             <span class="input-group-text">New Post</span>
@@ -10,7 +10,7 @@
         </div>
         <div class="form-group mt-3 mb-4">
             <label for="formFileLg" class="form-label">Add an Image</label>
-            <input class="form-control form-control-lg" id="postPicture" name="postPicture" type="file">
+            <input name="postPicture" id="postPicture" type="file" accept="image/png, image/jpeg" class="form-control form-control-lg">
         </div>
         @{
             <div class="pt-2">

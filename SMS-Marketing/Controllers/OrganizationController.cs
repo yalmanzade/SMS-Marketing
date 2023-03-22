@@ -17,6 +17,7 @@ namespace SMS_Marketing.Controllers
         private readonly UserManager<AppUser> _userManager;
         private readonly SignInManager<AppUser> _signInManager;
         #endregion
+
         #region Constructor
         public OrganizationController(ApplicationDbContext context, UserAuthDbContext authDbContext,
                                          UserManager<AppUser> userManager, SignInManager<AppUser> signInManager)
@@ -88,91 +89,80 @@ namespace SMS_Marketing.Controllers
         //POST: Organization/Index
         [HttpPost]
         [ActionName("SubmitPost")]
+        [ValidateAntiForgeryToken]
         public async Task<ActionResult> SubmitPost(string postText, IFormFile postPicture, int? id, int smsGroup, string? url,
                                                    IFormCollection collection)
         {
+            if (id == null) throw new Exception("This is not a valid Organization ID");
             try
             {
-                //var auth = new MvcAuthorizer
-                //{
-                //    CredentialStore = new SessionStateCredentialStore(HttpContext.Session)
-                //};
-                //if (auth.CredentialStore.OAuthToken == null)
-                //{
-                //    auth.CredentialStore = await GetCredentialStore(id);
-                //}
-                //TwitterContext twitterContext = new(auth);
-                //if (twitterContext != null && postPicture != null && postText != null)
-                //{
-                //    bool facebookSuccess = await PostToFacebookImage(postText, postPicture, id);
-                //    string mediaCategory = "tweet_image";
-                //    var fileStream = postPicture.OpenReadStream();
-                //    byte[] bytes = new byte[fileStream.Length];
-                //    using (fileStream)
-                //    {
-                //        fileStream.Read(bytes, 0, (int)postPicture.Length);
-                //    }
-                //    var imageUploads = new List<Task<Media>>
-                //    {
-                //        twitterContext.UploadMediaAsync(bytes, postPicture.ContentType,mediaCategory),
-                //    };
-                //    await Task.WhenAll(imageUploads);
-                //    List<string> mediaIds =
-                //        (from tsk in imageUploads
-                //         select tsk.Result.MediaID.ToString())
-                //         .ToList();
-                //    Tweet? tweet = await twitterContext.TweetMediaAsync(postText, mediaIds);
-                //    if (tweet != null)
-                //    {
-                //        ViewBag.Result += "Message Posted. " + tweet.ID;
-                //        return RedirectToAction("Index", "Organization", new { @id = id });
-                //    }
-                //    else
-                //    {
-                //        throw new Exception("We could not post your message to Twitter.");
-                //    }
-                //}
-                //if (twitterContext != null && postText != null && postText.Length > 0 && postText.Length < 280)
-                //{
-                //    var parameter = new Dictionary<string, string?>
-                //    {
-                //        { "status", postText}
-                //    };
-                //    string? queryString = "/statuses/update.json";
-                //    string? result = await twitterContext.ExecuteRawAsync(queryString, parameter, HttpMethod.Post);
-                //    if (result != null)
-                //    {
-                //        ViewBag.Result += "Message Posted. " + result;
-                //        return RedirectToAction("Index", "Organization", new { @id = id });
-                //    }
-                //    else
-                //    {
-                //        throw new Exception("Result is null. There has been an error sending your message.");
-                //    }
-                //}
-                //if (true)
-                //{
-                //    _ = await PostToTwilio(url, postText, id, smsGroup);
-                //}
-                Organization? organization = await GetCurrentOrg(id);
-                AppUser appUser = await GetCurrentUser();
+                //Creates new post object for our records.
                 Post post = InitPost(collection);
-                post.OrganizationId = organization.Id;
-                post.OrganizationName = organization.Name;
-                post.AuthorId = appUser.Id;
-                post.AuthorName = $"{appUser.FirstName} {appUser.LastName}";
-                post.Success = true;
-                await LogPost(post);
+
+                //Checks if we need to post to Twitter
+                if (post.OnTwitter)
+                {
+                    //Twitter : Gets organization's credentials/tokens
+                    var auth = new MvcAuthorizer
+                    {
+                        CredentialStore = new SessionStateCredentialStore(HttpContext.Session)
+                    };
+                    if (auth.CredentialStore.OAuthToken == null)
+                    {
+                        auth.CredentialStore = await GetCredentialStore(id);
+                    }
+                    //Twitter : Gets organization's Twitter Context
+                    TwitterContext twitterContext = new(auth);
+
+                    //Init Twitter API
+                    TwitterAPI twitterAPI = new(postText, postPicture, url, twitterContext);
+                    bool result = await twitterAPI.PostTweet();
+
+                    //If Tweet was posted successfully
+                    if (result)
+                    {
+                        TempData["Success"] += "Tweet was posted successfully.";
+                    }
+                    else
+                    {
+                        post.OnTwitter = false;
+                        TempData["Error"] += "Failed to post tweet.";
+                    }
+                }
+
+                if (post.OnSMS)
+                {
+                    _ = await PostToTwilio(url, postText, id, smsGroup);
+                }
+
+                //Checks to see if the post is Valid
+                if (post.IsServices)
+                {
+                    Organization? organization = await GetCurrentOrg(id);
+                    AppUser appUser = await GetCurrentUser();
+
+                    //Add more info to the post object
+                    post.OrganizationId = organization.Id;
+                    post.OrganizationName = organization.Name;
+                    post.AuthorId = appUser.Id;
+                    post.AuthorName = $"{appUser.FirstName} {appUser.LastName}";
+                    post.Success = true;
+
+                    //Saves post to database
+                    await LogPost(post);
+                }
+                else
+                {
+                    TempData["Error"] = "Please select a service.";
+                }
+                return RedirectToAction("Index", new { id = id });
             }
             catch (Exception ex)
             {
                 TempData["Error"] += ex.Message;
                 RedirectToAction("Index", "Error");
             }
-            if (id != null)
-            {
-                return RedirectToAction("Index", new { id = id });
-            }
+
             TempData["Error"] += "Unexpected Error.";
             return RedirectToAction("Index", "Organization", new { @id = id });
         }

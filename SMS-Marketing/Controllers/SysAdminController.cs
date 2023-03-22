@@ -69,6 +69,8 @@ namespace SMS_Marketing.Controllers
             }
             catch (Exception ex)
             {
+                Error.InitializeError("Create Organization GET", "200", ex.Message);
+                Error.LogError();
                 TempData["Error"] = ex.Message;
                 return RedirectToAction("Index", "Error");
             }
@@ -90,20 +92,21 @@ namespace SMS_Marketing.Controllers
 
                 if (ModelState.IsValid)
                 {
-                    //Gathers and checks data
+                    //Gt and checks data
                     string? organizationName = collection["Name"];
                     string? managerId = collection["ManagerId"];
                     if (organizationName == null || managerId == null) throw new Exception("Invalid Parameters.");
                     AppUser? organizationManager = await _authContext.Users.FindAsync(managerId.ToString());
                     if (organizationManager == null) throw new Exception("We could not find this user.");
 
-                    //Creates new Organization
+                    //Creates and Saves new Organization
                     Organization organization = new();
                     organization.IsActive = true;
                     organization.Name = organizationName;
                     organization.ManagerId = organizationManager.Id;
                     organization.ManagerName = $"{organizationManager.FirstName} {organizationManager.LastName}";
                     await _context.Organizations.AddAsync(organization);
+                    await _context.SaveChangesAsync();
 
                     //Set permissions for Organization Manager
                     organizationManager.SetOrgManagerPermissions();
@@ -114,7 +117,7 @@ namespace SMS_Marketing.Controllers
                     {
                         OrganizationId = organization.Id,
                         Name = "All Users",
-                        Description = "This group contains all users",
+                        Description = "This group contains all users.",
                         IsDefault = true
                     };
                     await _context.Groups.AddAsync(group);
@@ -122,13 +125,16 @@ namespace SMS_Marketing.Controllers
                     //Updates both contexts
                     await _authContext.SaveChangesAsync();
                     await _context.SaveChangesAsync();
-                    return View("Index");
+                    TempData["Success"] = $"{organization.Name} was created.";
+                    return RedirectToAction("Index");
                 }
                 throw new Exception("There was a problem with the form. Please try again later.");
             }
             catch (Exception ex)
             {
-                TempData["Error"] += ex.Message;
+                Error.InitializeError("Create Organization Post", "200", ex.Message);
+                Error.LogError();
+                TempData["Error"] = ex.Message;
                 return RedirectToAction("Index", "Error");
             }
         }
@@ -168,7 +174,9 @@ namespace SMS_Marketing.Controllers
             }
             catch (Exception ex)
             {
-                TempData["Error"] += ex.Message;
+                Error.InitializeError("Disable Organization", "200", ex.Message);
+                Error.LogError();
+                TempData["Error"] = ex.Message;
                 return RedirectToAction("Index", "Error");
             }
             return RedirectToAction("Index");
@@ -198,7 +206,10 @@ namespace SMS_Marketing.Controllers
             }
             catch (Exception ex)
             {
-                TempData["Error"] += ex.Message;
+                Error.InitializeError("Organization Details", "200", ex.Message);
+                Error.LogError();
+                TempData["Error"] = ex.Message;
+                return RedirectToAction("Index", "Error");
             }
             return View(organization);
         }
@@ -221,7 +232,9 @@ namespace SMS_Marketing.Controllers
             }
             catch (Exception ex)
             {
-                TempData["Error"] += ex.Message;
+                Error.InitializeError("Edit Organization", "200", ex.Message);
+                Error.LogError();
+                TempData["Error"] = ex.Message;
                 return RedirectToAction("Index", "Error");
             }
         }
@@ -261,7 +274,7 @@ namespace SMS_Marketing.Controllers
                     if (OrgUser == null) throw new Exception("We could not create the organization. Please try again.");
                     organization.ManagerName = $"{OrgUser.FirstName} {OrgUser.LastName}";
                     //Update Twilio Information
-                    string twilioNumber = collection["TwilioPhoneNumber"];
+                    string? twilioNumber = collection["TwilioPhoneNumber"];
                     if (twilioNumber == null || twilioNumber.Length < 10)
                     {
                         organization.IsSMS = false;
@@ -280,8 +293,10 @@ namespace SMS_Marketing.Controllers
             }
             catch (Exception ex)
             {
-                TempData["Error"] += ex.Message;
-                return View();
+                Error.InitializeError("Edit Organization Post", "200", ex.Message);
+                Error.LogError();
+                TempData["Error"] = ex.Message;
+                return RedirectToAction("Index", "Error");
             }
         }
 
@@ -308,7 +323,9 @@ namespace SMS_Marketing.Controllers
             }
             catch (Exception ex)
             {
-                TempData["Error"] += ex.Message;
+                Error.InitializeError("Download Logs", "200", ex.Message);
+                Error.LogError();
+                TempData["Error"] = ex.Message;
                 return RedirectToAction("Index", "Error");
             }
         }
@@ -339,7 +356,10 @@ namespace SMS_Marketing.Controllers
             }
             catch (Exception ex)
             {
-                TempData["Error"] += ex.Message;
+                Error.InitializeError("App Settings", "200", ex.Message);
+                Error.LogError();
+                TempData["Error"] = ex.Message;
+                return RedirectToAction("Index", "Error");
             }
             return View();
         }
@@ -373,7 +393,10 @@ namespace SMS_Marketing.Controllers
             }
             catch (Exception ex)
             {
-                TempData["Error"] += ex.Message;
+                Error.InitializeError("Post Settings", "200", ex.Message);
+                Error.LogError();
+                TempData["Error"] = ex.Message;
+                return RedirectToAction("Index", "Error");
             }
             return RedirectToAction("Settings");
         }
