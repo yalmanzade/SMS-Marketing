@@ -35,11 +35,15 @@ namespace SMS_Marketing.Controllers
         }
 
         #region User Authentication
+        public ActionResult Login(int? id)
+        {
+            return RedirectToAction("LoginTwitter", new { @id = id });
+        }
 
-        //POST: TwitterController/Login/
-        [ActionName("Login")]
-        [ValidateAntiForgeryToken]
-        public async Task<ActionResult> Login(int? id)
+        //GET: TwitterController/Login/3
+        [ActionName("LoginTwitter")]
+        //[ValidateAntiForgeryToken]
+        public async Task<ActionResult> LoginTwitter(int? id)
         {
             try
             {
@@ -49,7 +53,9 @@ namespace SMS_Marketing.Controllers
                     var twitterAuth = _context.TwitterAuth
                                    .Where(i => i.OrganizationId == id)
                                    .FirstOrDefault();
-                    if (twitterAuth == null)
+                    Organization? organization = await GetCurrentOrg(id);
+                    if (organization == null || organization.IsActive == false) throw new Exception("Not a valid organization.");
+                    if (twitterAuth == null || organization.IsTwitter == false)
                     {
                         //await auth.CredentialStore.ClearAsync();
                         var auth = new MvcAuthorizer
@@ -64,7 +70,8 @@ namespace SMS_Marketing.Controllers
                         };
                         //string twitterCallbackUrl = Request.GetDisplayUrl().Replace("Login", "CompleteLogin");
                         TempData["CurrentOrg"] = id;
-                        string twitterCallbackUrl = "https://localhost:7076/Organization/MyOrganizations/";
+                        //string twitterCallbackUrl = "https://localhost:7076/Organization/MyOrganizations/";
+                        string twitterCallbackUrl = "https://localhost:7076/Twitter/CompleteLogin/";
                         return await auth.BeginAuthorizationAsync(new Uri(twitterCallbackUrl));
                     };
                     if (twitterAuth.AccessToken != null && twitterAuth.OAuthToken != null)
@@ -84,44 +91,24 @@ namespace SMS_Marketing.Controllers
                         //await SaveTwitterOrgChanges((int)id);
                         return RedirectToAction("Index", "Organization", new { @id = id });
                     }
-
                 }
                 else
                 {
-                    throw new Exception("Invalid Organization Id");
+                    throw new Exception("Invalid Organization Id.");
                 }
             }
             catch (Exception ex)
             {
-                ViewBag.Error = ex.Message;
-                return View();
+                Error.InitializeError("Twitter Authentication", id.ToString(), ex.Message);
+                Error.LogError();
+                TempData["Error"] += ex.Message;
+                return RedirectToAction("Index", "Error");
             }
-            ViewBag.Error = "There has been an unidentified error";
+            TempData["Error"] += "There has been an unidentified error.";
             return View("Index");
         }
 
-        private async Task<ActionResult> SaveTwitterOrgChanges(int organizationId)
-        {
-            try
-            {
-                Organization organization = await _context.Organizations.FindAsync(organizationId);
-                if (organization != null)
-                {
-                    _context.Organizations.Update(organization);
-                    await _context.SaveChangesAsync();
-                }
-                else
-                {
-                    throw new Exception("Could not update your organization.");
-                }
-            }
-            catch (Exception ex)
-            {
-                ViewBag.Error = ex.Message;
-                return RedirectToAction("Organization/" + organizationId);
-            }
-            return RedirectToAction("Organization/" + organizationId);
-        }
+
 
         private async Task<ActionResult> AuthorizeUser()
         {
@@ -136,8 +123,79 @@ namespace SMS_Marketing.Controllers
                 }
             };
             //await auth.CredentialStore.ClearAsync();
-            string twitterCallbackUrl = Request.GetDisplayUrl().Replace("Login", "CompleteLogin");
+            string twitterCallbackUrl = "https://localhost:7076/Twitter/CompleteLogin/";
             return await auth.BeginAuthorizationAsync(new Uri(twitterCallbackUrl));
+        }
+
+        //GET: Twitter/CompleteLogin/
+        [ActionName("CompleteLogin")]
+        public async Task<ActionResult> CompleteLogin()
+        {
+            int? id = (int)TempData.Peek("CurrentOrg");
+            if (id == null) throw new Exception("Invalid Organization Id");
+            try
+            {
+                //Init Credential Store that holds Twitter Tokens
+                var auth = new MvcAuthorizer
+                {
+                    CredentialStore = new SessionStateCredentialStore(HttpContext.Session)
+                };
+
+                //Reads Tokens from URL and stores them
+                await auth.CompleteAuthorizeAsync(new Uri(Request.GetDisplayUrl()));
+                var credentials = auth.CredentialStore;
+
+                //Creates Auth Object
+                TwitterAuth twitterAuth = new();
+                //twitterAuth.OrganizationId = (int)organizationId;
+                _ = id != null ? twitterAuth.OrganizationId = (int)id : throw new ArgumentException();
+                _ = credentials.ScreenName != null ? twitterAuth.UserScreenName = credentials.ScreenName : throw new ArgumentException();
+                _ = credentials.OAuthToken != null ? twitterAuth.OAuthToken = credentials.OAuthToken : throw new ArgumentException();
+                _ = credentials.OAuthTokenSecret != null ? twitterAuth.AccessToken = credentials.OAuthTokenSecret : throw new ArgumentException();
+                _ = credentials.UserID.ToString() != null ? twitterAuth.TwitterId = credentials.UserID.ToString() : throw new ArgumentException();
+
+                await _context.TwitterAuth.AddAsync(twitterAuth);
+                await AddTwitterToOrganization((int)id);
+                await _context.SaveChangesAsync();
+                TempData["Success"] += "Saved Twitter Credentials.";
+                return RedirectToAction("Index", "Organization", new { id = id });
+            }
+            catch (Exception ex)
+            {
+                Error.InitializeError("Twitter Authentication", id.ToString(), ex.Message);
+                Error.LogError();
+                TempData["Error"] += ex.Message;
+                return RedirectToAction("Index", "Error");
+            }
+        }
+
+        #endregion
+
+        #region Helper Methods
+
+        private async Task<ActionResult> SaveTwitterOrgChanges(int organizationId)
+        {
+            try
+            {
+                Organization? organization = await _context.Organizations.FindAsync(organizationId);
+                if (organization != null)
+                {
+                    _context.Organizations.Update(organization);
+                    await _context.SaveChangesAsync();
+                }
+                else
+                {
+                    throw new Exception("Could not update your organization.");
+                }
+            }
+            catch (Exception ex)
+            {
+                Error.InitializeError("Save Twitter Credentials.", $"Org Id: {organizationId}", ex.Message);
+                Error.LogError();
+                TempData["Error"] += ex.Message;
+                return RedirectToAction("Index", "Error");
+            }
+            return RedirectToAction("Organization/" + organizationId);
         }
 
         private async Task<Organization> AddTwitterToOrganization(int id)
@@ -153,57 +211,42 @@ namespace SMS_Marketing.Controllers
             }
             catch (Exception ex)
             {
-                ViewBag.Error = ex.Message;
+                Error.InitializeError("Save Twitter Credentials.", $"Org Id: {id}", ex.Message);
+                Error.LogError();
+                TempData["Error"] += ex.Message;
             }
             return organization;
+        }
+
+        private async Task<Organization?> GetCurrentOrg(int? id)
+        {
+            try
+            {
+                Organization? organization = new();
+                if (id != null)
+                {
+                    organization = await _context.Organizations.FindAsync(id);
+                    if (organization != null) ViewData["CurrentOrg"] = organization;
+                    if (organization != null) return organization;
+                }
+                if (organization == null)
+                {
+                    throw new ArgumentNullException("We could not retieve your organization.");
+                }
+
+            }
+            catch (Exception ex)
+            {
+                Error.InitializeError("Twitter Authentication", id.ToString(), ex.Message);
+                Error.LogError();
+                TempData["Error"] += ex.Message;
+            }
+            return null;
         }
 
         #endregion
 
         #region For Testing - not in production
-
-        //GET: TwitterController/Details/5
-        [ActionName("CompleteLogin")]
-        public async Task<ActionResult> CompleteLogin()
-        {
-            int? id = (int)TempData.Peek("CurrentOrg");
-            try
-            {
-                if (id != null && id > 0)
-                {
-                    var auth = new MvcAuthorizer
-                    {
-                        CredentialStore = new SessionStateCredentialStore(HttpContext.Session)
-                    };
-                    await auth.CompleteAuthorizeAsync(new Uri(Request.GetDisplayUrl()));
-                    var credentials = auth.CredentialStore;
-
-                    TwitterAuth twitterAuth = new();
-                    //twitterAuth.OrganizationId = (int)organizationId;
-                    _ = id != null ? twitterAuth.OrganizationId = (int)id : throw new ArgumentException();
-                    _ = credentials.ScreenName != null ? twitterAuth.UserScreenName = credentials.ScreenName : throw new ArgumentException();
-                    _ = credentials.OAuthToken != null ? twitterAuth.OAuthToken = credentials.OAuthToken : throw new ArgumentException();
-                    _ = credentials.OAuthTokenSecret != null ? twitterAuth.AccessToken = credentials.OAuthTokenSecret : throw new ArgumentException();
-                    _ = credentials.UserID.ToString() != null ? twitterAuth.TwitterId = credentials.UserID.ToString() : throw new ArgumentException();
-
-                    await _context.TwitterAuth.AddAsync(twitterAuth);
-                    await AddTwitterToOrganization((int)id);
-                    await _context.SaveChangesAsync();
-                    //twitterAuth.TwitterId = credentials.UserID.ToString();
-
-                    //string oauthtoken = credentials.OAuthToken;
-                    //string oauthtokensecret = credentials.OAuthTokenSecret;
-                    //string screenname = credentials.ScreenName;
-                    //ulong userid = credentials.UserID;
-                }
-                ViewBag.Success = "Saved Twitter Credentials";
-            }
-            catch (Exception ex)
-            {
-                ViewBag.ErrorMessage = ex.Message;
-            }
-            return View();
-        }
 
         //POST TwitterController/Twitter/CompleteLogin
         [HttpPost]
@@ -238,8 +281,10 @@ namespace SMS_Marketing.Controllers
                 }
                 catch (Exception ex)
                 {
-                    ViewBag.Result = ex.Message;
-                    Console.WriteLine(ex.Message);
+                    Error.InitializeError("Twitter Posting", "No Org Id", ex.Message);
+                    Error.LogError();
+                    TempData["Error"] += ex.Message;
+                    return RedirectToAction("Index", "Error");
                 }
 
             }

@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace SMS_Marketing.Models
 {
@@ -46,5 +47,14 @@ namespace SMS_Marketing.Models
         [Required]
         [DisplayName("Success")]
         public bool Success { get; set; } = false;
+
+        [NotMapped]
+        public bool IsServices
+        {
+            get
+            {
+                return OnTwitter && OnSMS && OnFacebook;
+            }
+        }
     }
 }

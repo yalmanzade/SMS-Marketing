@@ -36,6 +36,8 @@ public class Organization
             return $"https://localhost:7076/Share/Index/{this.Id.ToString()}";
         }
     }
+    [NotMapped]
+    public AppUser CurrentUser = new();
 }
 public class CustomerViewModel
 {

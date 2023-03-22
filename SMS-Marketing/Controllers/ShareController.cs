@@ -68,7 +68,7 @@ namespace SMS_Marketing.Controllers
                 if (customerForm == null) throw new Exception("Invalid Data. Please try again.");
                 if (ModelState.IsValid)
                 {
-                    var prefix = customerForm.PhoneNumber.Substring(0, 1);
+                    var prefix = customerForm.PhoneNumber[..1];
                     if (prefix != "+1")
                     {
                         customerForm.PhoneNumber = "+1" + customerForm.PhoneNumber;
@@ -92,7 +92,6 @@ namespace SMS_Marketing.Controllers
                         GroupId = group.Id,
                         GroupName = group.Name,
                         PhoneNumber = customerForm.PhoneNumber,
-                        //Email = customerForm.Email
                     };
                     await _context.AddAsync(newCustomer);
                     await _context.SaveChangesAsync();
