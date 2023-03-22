@@ -1,19 +1,20 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using SMS_Marketing.Areas.Identity.Data;
 using SMS_Marketing.Data;
 using SMS_Marketing.Models;
 
 namespace SMS_Marketing.Controllers
 {
-    public class CustomerController : Controller
+    public class FacebookController : Controller
     {
         private readonly ApplicationDbContext _context;
         private readonly UserAuthDbContext _authContext;
         private readonly UserManager<AppUser> _userManager;
         private readonly SignInManager<AppUser> _signInManager;
 
-        public CustomerController(ApplicationDbContext context, UserAuthDbContext authDbContext,
+        public FacebookController(ApplicationDbContext context, UserAuthDbContext authDbContext,
                                          UserManager<AppUser> userManager, SignInManager<AppUser> signInManager)
         {
             _userManager = userManager;
@@ -50,14 +51,15 @@ namespace SMS_Marketing.Controllers
         {
             return View();
         }
-        public async Task<IActionResult> CreateCustomer(int? id)
+        #region Add Facebook Functionality
+        public async Task<IActionResult> AddFacebook(int? id)
         {
             try
             {
                 if (id != null)
                 {
                     var organization = await GetCurrentOrg(id);
-                    TempData["Success"] = "Customers Retrieved";
+                    TempData["Success"] = "Organization Retrieved";
                     return View(organization);
                 }
 
@@ -72,33 +74,23 @@ namespace SMS_Marketing.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Submit(int? id)
         {
-            string FName = HttpContext.Request.Form["FirstNameInput"];
-            string LName = HttpContext.Request.Form["LastNameInput"];
-            string PNum = HttpContext.Request.Form["PhoneNumberInput"];
-            int? Id = id;
-            Customer customer = new();
-            customer.OrganizationId = Id.GetValueOrDefault();
-            customer.FirstName = FName;
-            customer.LastName = LName;
-            customer.PhoneNumber = PNum;
-            customer.GroupId = Id.GetValueOrDefault();
-            if (TryValidateModel(customer))
-            {
-                _context.Customers.Add(customer);
-                _context.SaveChanges();
-            }
-            if (!TryValidateModel(customer))
-                return RedirectToAction("Index", "Error");
-            return RedirectToAction("Customers", "Organization", new { @id = id });
+                string AppId = HttpContext.Request.Form["AppId"];
+                string AccessToken = HttpContext.Request.Form["AccessToken"];
+                string UserScreenName = HttpContext.Request.Form["UserScreenName"];
+                FacebookAuth facebookAuth = new FacebookAuth();
+                facebookAuth.OrganizationId = id.GetValueOrDefault();
+                facebookAuth.AppId = AppId;
+                facebookAuth.AccessToken = AccessToken;
+                facebookAuth.UserScreenName = UserScreenName;
+                if (TryValidateModel(facebookAuth))
+                {
+                    _context.FacebookAuth.Add(facebookAuth);
+                    _context.SaveChanges();
+                }
+                if (!TryValidateModel(facebookAuth))
+                    return RedirectToAction("Index", "Error");
+            return RedirectToAction("Index", "Organization", new { @id = id });
         }
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Delete(int? id)
-        {
-            var customer = _context.Customers.Where(e => e.Id == id).FirstOrDefault();
-            customer.IsActive = false;
-            _context.SaveChanges();
-            return RedirectToAction("Customers", "Organization", new { @id = customer.OrganizationId });
-        }
+        #endregion
     }
 }
