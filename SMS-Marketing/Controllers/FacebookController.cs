@@ -74,6 +74,7 @@ namespace SMS_Marketing.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Submit(int? id)
         {
+
                 string AppId = HttpContext.Request.Form["AppId"];
                 string AccessToken = HttpContext.Request.Form["AccessToken"];
                 string UserScreenName = HttpContext.Request.Form["UserScreenName"];
@@ -85,7 +86,7 @@ namespace SMS_Marketing.Controllers
                 if (TryValidateModel(facebookAuth))
                 {
                     _context.FacebookAuth.Add(facebookAuth);
-                    _context.SaveChanges();
+                    _context.SaveChangesAsync();
                 }
                 if (!TryValidateModel(facebookAuth))
                     return RedirectToAction("Index", "Error");

@@ -81,7 +81,8 @@ namespace SMS_Marketing.Controllers
             customer.FirstName = FName;
             customer.LastName = LName;
             customer.PhoneNumber = PNum;
-            customer.GroupId = Id.GetValueOrDefault();
+            Group TempGroup = _context.Groups.Where(e => e.OrganizationId == id && e.IsDefault == true).FirstOrDefault();
+            customer.GroupId = TempGroup.Id;
             if (TryValidateModel(customer))
             {
                 _context.Customers.Add(customer);
