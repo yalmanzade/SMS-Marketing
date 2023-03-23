@@ -116,7 +116,10 @@ namespace SMS_Marketing.Controllers
 
                     //Init Twitter API
                     TwitterAPI twitterAPI = new(postText, postPicture, url, twitterContext);
-                    bool result = await twitterAPI.PostTweet();
+
+                    //Posting to Twitter
+                    bool result = true;
+                    //bool result = await twitterAPI.PostTweet();
 
                     //If Tweet was posted successfully
                     if (result)
@@ -153,7 +156,7 @@ namespace SMS_Marketing.Controllers
                 }
                 else
                 {
-                    TempData["Error"] = "Please select a service.";
+                    TempData["Error"] += "Please select a service.";
                 }
                 return RedirectToAction("Index", new { id = id });
             }

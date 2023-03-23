@@ -53,7 +53,7 @@ namespace SMS_Marketing.Models
         {
             get
             {
-                return OnTwitter && OnSMS && OnFacebook;
+                return OnTwitter || OnSMS || OnFacebook;
             }
         }
     }

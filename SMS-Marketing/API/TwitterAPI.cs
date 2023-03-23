@@ -13,13 +13,13 @@ public class TwitterAPI
     //Private Members
     private string TwitterBody { get; set; } = string.Empty;
     private Stream FileStream { get; set; }
-    private byte[] Bytes => new byte[FileStream.Length];
+    private byte[] Bytes = null;
     public string MediaCategory { get; set; } = "tweet_image";
 
     public TwitterAPI(string boby, IFormFile? postImage, string url, TwitterContext? twitterContext)
     {
         TwitterBody = boby;
-        if (TwitterBody.Length > 279)
+        if (!TwitterBody.IsNullOrEmpty() && TwitterBody.Length > 279)
         {
             TwitterBody = TwitterBody[..279];
         }
@@ -39,10 +39,15 @@ public class TwitterAPI
             if (PostImage != null)
             {
                 //Reads file
-                FileStream.Read(Bytes, 0, (int)PostImage.Length);
+                using var fileStream = PostImage.OpenReadStream();
+                byte[] bytes = new byte[fileStream.Length];
+                fileStream.Read(bytes, 0, (int)PostImage.Length);
+
+
+                //Prepares files for upload
                 var imageUploads = new List<Task<Media>>
                 {
-                     TwitterContext.UploadMediaAsync(Bytes,PostImage.ContentType,MediaCategory),
+                     TwitterContext.UploadMediaAsync(bytes,PostImage.ContentType,MediaCategory),
                 };
 
                 //Uploads files
