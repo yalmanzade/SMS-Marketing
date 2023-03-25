@@ -38,5 +38,9 @@ namespace SMS_Marketing.Models
 
         [NotMapped]
         public Organization? Organization { get; set; }
+        [NotMapped]
+        public FacebookAuth? Facebook { get; set; }
+        [NotMapped]
+        public TwitterAuth? Twitter { get; set; }
     }
 }
