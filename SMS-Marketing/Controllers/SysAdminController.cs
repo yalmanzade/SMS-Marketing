@@ -122,7 +122,7 @@ namespace SMS_Marketing.Controllers
                     organization.ManagerName = $"{organizationManager.FirstName} {organizationManager.LastName}";
                     await _context.Organizations.AddAsync(organization);
                     await _context.SaveChangesAsync();
-
+                    
                     //Set permissions for Organization Manager
                     organizationManager.SetOrgManagerPermissions();
                     _authContext.Users.Update(organizationManager);

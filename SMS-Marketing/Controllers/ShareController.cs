@@ -45,10 +45,14 @@ namespace SMS_Marketing.Controllers
                 if (id == null) throw new Exception("This organization is not valid.");
                 Organization? organization = await _context.Organizations.FindAsync(id);
                 if (organization == null) throw new Exception("Organization not found.");
+                FacebookAuth? facebook = _context.FacebookAuth.Where(e => e.OrganizationId == id).FirstOrDefault();
+                TwitterAuth? twitter = _context.TwitterAuth.Where(e => e.OrganizationId == id).FirstOrDefault();
                 Customer customer = new()
                 {
                     OrganizationId = organization.Id,
-                    Organization = organization
+                    Organization = organization,
+                    Facebook = facebook,
+                    Twitter = twitter
                 };
                 return View(customer);
             }
