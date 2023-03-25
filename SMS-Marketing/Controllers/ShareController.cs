@@ -1,4 +1,6 @@
-﻿using Microsoft.AspNetCore.Identity;
+﻿// This controller is the shared or public view of the Website
+// Users do not need to be logged in to access these actions/resources.
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using SMS_Marketing.Areas.Identity.Data;
@@ -69,6 +71,7 @@ namespace SMS_Marketing.Controllers
         {
             try
             {
+                //Customer Form includes the Organi
                 if (customerForm == null) throw new Exception("Invalid Data. Please try again.");
                 if (ModelState.IsValid)
                 {

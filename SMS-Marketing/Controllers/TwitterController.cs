@@ -108,8 +108,6 @@ namespace SMS_Marketing.Controllers
             return View("Index");
         }
 
-
-
         private async Task<ActionResult> AuthorizeUser()
         {
             var auth = new MvcAuthorizer

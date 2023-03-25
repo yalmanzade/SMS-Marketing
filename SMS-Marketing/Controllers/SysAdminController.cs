@@ -36,11 +36,18 @@ namespace SMS_Marketing.Controllers
             try
             {
                 //Authentication Starts
-                //AppUser user = await GetCurrentUser();
-                //if (IsSysManager(user) == false) throw new Exception("You do not have access to this page.");
+                AppUser user = await GetCurrentUser();
+                user.IsAdmin();
                 // End Authentication
                 ViewBag.OrganizationList = _context.Organizations.ToList();
                 return View();
+            }
+            catch (NoUserAccessException ex)
+            {
+                Error.InitializeError("Admin Index", "200", ex.AdminMessage);
+                Error.LogError();
+                TempData["Error"] = ex.Message;
+                return RedirectToAction("Index", "Error");
             }
             catch (Exception ex)
             {
@@ -62,10 +69,18 @@ namespace SMS_Marketing.Controllers
             try
             {
                 //Authentication Starts
-                //AppUser user = await GetCurrentUser();
-                //if (IsSysManager(user) == false) throw new Exception("You do not have access to this page.");
+                AppUser user = await GetCurrentUser();
+                user.IsAdmin();
                 // End Authentication
                 ViewBag.UserList = _authContext.Users.ToList();
+            }
+
+            catch (NoUserAccessException ex)
+            {
+                Error.InitializeError("Admin Index", "200", ex.AdminMessage);
+                Error.LogError();
+                TempData["Error"] = ex.Message;
+                return RedirectToAction("Index", "Error");
             }
             catch (Exception ex)
             {
@@ -86,8 +101,8 @@ namespace SMS_Marketing.Controllers
             try
             {
                 //Authentication Starts
-                //AppUser user = await GetCurrentUser();
-                //if (IsSysManager(user) == false) throw new Exception("You do not have access to this page.");
+                AppUser user = await GetCurrentUser();
+                user.IsAdmin();
                 // End Authentication
 
                 if (ModelState.IsValid)
@@ -130,6 +145,14 @@ namespace SMS_Marketing.Controllers
                 }
                 throw new Exception("There was a problem with the form. Please try again later.");
             }
+
+            catch (NoUserAccessException ex)
+            {
+                Error.InitializeError("Admin Index", "200", ex.AdminMessage);
+                Error.LogError();
+                TempData["Error"] = ex.Message;
+                return RedirectToAction("Index", "Error");
+            }
             catch (Exception ex)
             {
                 Error.InitializeError("Create Organization Post", "200", ex.Message);
@@ -144,8 +167,8 @@ namespace SMS_Marketing.Controllers
             try
             {
                 //Authentication Starts
-                //AppUser user = await GetCurrentUser();
-                //if (IsSysManager(user) == false) throw new Exception("You do not have access to this page.");
+                AppUser user = await GetCurrentUser();
+                user.IsAdmin();
                 // End Authentication
 
                 if (id == null) throw new Exception("Invalid Id.");
@@ -172,6 +195,14 @@ namespace SMS_Marketing.Controllers
                 await _authContext.SaveChangesAsync();
                 TempData["Success"] += "The organization was disabled.";
             }
+
+            catch (NoUserAccessException ex)
+            {
+                Error.InitializeError("Admin Index", "200", ex.AdminMessage);
+                Error.LogError();
+                TempData["Error"] = ex.Message;
+                return RedirectToAction("Index", "Error");
+            }
             catch (Exception ex)
             {
                 Error.InitializeError("Disable Organization", "200", ex.Message);
@@ -189,10 +220,9 @@ namespace SMS_Marketing.Controllers
             try
             {
                 //Authentication Starts
-                //AppUser user = await GetCurrentUser();
-                //if (IsSysManager(user) == false) throw new Exception("You do not have access to this page.");
+                AppUser user = await GetCurrentUser();
+                user.IsAdmin();
                 // End Authentication
-
                 if (id == null || id == 0)
                 {
                     return NotFound();
@@ -203,6 +233,14 @@ namespace SMS_Marketing.Controllers
                 {
                     return NotFound();
                 }
+            }
+
+            catch (NoUserAccessException ex)
+            {
+                Error.InitializeError("Admin Index", "200", ex.AdminMessage);
+                Error.LogError();
+                TempData["Error"] = ex.Message;
+                return RedirectToAction("Index", "Error");
             }
             catch (Exception ex)
             {
@@ -220,8 +258,8 @@ namespace SMS_Marketing.Controllers
             try
             {
                 //Authentication Starts
-                //AppUser user = await GetCurrentUser();
-                //if (IsSysManager(user) == false) throw new Exception("You do not have access to this page.");
+                AppUser user = await GetCurrentUser();
+                user.IsAdmin();
                 // End Authentication
 
                 if (id == null) throw new ArgumentNullException("Id is not valid.");
@@ -229,6 +267,14 @@ namespace SMS_Marketing.Controllers
                 if (organization == null) throw new Exception("Invalid Organization");
                 ViewBag.UserList = _authContext.Users.ToList();
                 return View(organization);
+            }
+
+            catch (NoUserAccessException ex)
+            {
+                Error.InitializeError("Admin Index", "200", ex.AdminMessage);
+                Error.LogError();
+                TempData["Error"] = ex.Message;
+                return RedirectToAction("Index", "Error");
             }
             catch (Exception ex)
             {
@@ -247,8 +293,8 @@ namespace SMS_Marketing.Controllers
             try
             {
                 //Authentication Starts
-                //AppUser user = await GetCurrentUser();
-                //if (IsSysManager(user) == false) throw new Exception("You do not have access to this page.");
+                AppUser user = await GetCurrentUser();
+                user.IsAdmin();
                 // End Authentication
 
                 if (ModelState.IsValid)
@@ -291,6 +337,14 @@ namespace SMS_Marketing.Controllers
                 }
                 throw new Exception("There was an unknown issue. Please try again.");
             }
+
+            catch (NoUserAccessException ex)
+            {
+                Error.InitializeError("Admin Index", "200", ex.AdminMessage);
+                Error.LogError();
+                TempData["Error"] = ex.Message;
+                return RedirectToAction("Index", "Error");
+            }
             catch (Exception ex)
             {
                 Error.InitializeError("Edit Organization Post", "200", ex.Message);
@@ -304,22 +358,55 @@ namespace SMS_Marketing.Controllers
 
         #region Insights
 
-        public ActionResult Insights()
-        {
-            return View();
-        }
-
-        [ActionName("DownloadLog")]
-        public ActionResult DownloadLog()
+        public async Task<ActionResult> Insights()
         {
             try
             {
+                //Authentication Starts
+                AppUser user = await GetCurrentUser();
+                user.IsAdmin();
+                // End Authentication
+
+                return View();
+            }
+            catch (NoUserAccessException ex)
+            {
+                Error.InitializeError("Admin Index", "200", ex.AdminMessage);
+                Error.LogError();
+                TempData["Error"] = ex.Message;
+                return RedirectToAction("Index", "Error");
+            }
+            catch (Exception ex)
+            {
+                Error.InitializeError("Download Logs", "200", ex.Message);
+                Error.LogError();
+                TempData["Error"] = ex.Message;
+                return RedirectToAction("Index", "Error");
+            }
+        }
+
+        [ActionName("DownloadLog")]
+        public async Task<ActionResult> DownloadLog()
+        {
+            try
+            {
+                //Authentication Starts
+                AppUser user = await GetCurrentUser();
+                user.IsAdmin();
+                // End Authentication
                 string path = Directory.GetCurrentDirectory();
                 path += @"\Logs\";
                 byte[] file = System.IO.File.ReadAllBytes(path + "log.txt");
                 string filename = "logs.txt";
                 return File(file, System.Net.Mime.MediaTypeNames.Application.Octet, filename);
 
+            }
+            catch (NoUserAccessException ex)
+            {
+                Error.InitializeError("Admin Index", "200", ex.AdminMessage);
+                Error.LogError();
+                TempData["Error"] = ex.Message;
+                return RedirectToAction("Index", "Error");
             }
             catch (Exception ex)
             {
@@ -338,7 +425,12 @@ namespace SMS_Marketing.Controllers
         {
             try
             {
-                if (id == null) id = "TWITTER";
+                //Authorization begins
+                AppUser user = await GetCurrentUser();
+                user.IsAdmin();
+                //Authorization Ends
+
+                id ??= "TWITTER";
                 if (id != null)
                 {
                     ViewBag.SettingsKey = id.ToUpper();
@@ -353,6 +445,13 @@ namespace SMS_Marketing.Controllers
                 {
                     throw new Exception("Invalid Route");
                 }
+            }
+            catch (NoUserAccessException ex)
+            {
+                Error.InitializeError("Admin Index", "200", ex.AdminMessage);
+                Error.LogError();
+                TempData["Error"] = ex.Message;
+                return RedirectToAction("Index", "Error");
             }
             catch (Exception ex)
             {
@@ -369,6 +468,11 @@ namespace SMS_Marketing.Controllers
         {
             try
             {
+                //Authorization begins
+                AppUser user = await GetCurrentUser();
+                user.IsAdmin();
+                //Authorization Ends
+
                 if (setting != null && index != null)
                 {
                     var currentSetting = (from e in _context.AppSettings
@@ -391,6 +495,13 @@ namespace SMS_Marketing.Controllers
                     throw new Exception("Invalid form. Please try again.");
                 }
             }
+            catch (NoUserAccessException ex)
+            {
+                Error.InitializeError("Admin Index", "200", ex.AdminMessage);
+                Error.LogError();
+                TempData["Error"] = ex.Message;
+                return RedirectToAction("Index", "Error");
+            }
             catch (Exception ex)
             {
                 Error.InitializeError("Post Settings", "200", ex.Message);
@@ -404,21 +515,6 @@ namespace SMS_Marketing.Controllers
         #endregion
 
         #region Helper Methods
-
-        // Checks if user is the System Manager.
-        private static bool IsSysManager(AppUser appUser)
-        {
-            try
-            {
-                if (appUser == null) throw new Exception("Please log in to perform this operation.");
-                if (appUser.IsSystemManager == false) throw new Exception("You do not have access to perform this action.");
-                return true;
-            }
-            catch (Exception ex)
-            {
-                return false;
-            }
-        }
 
         // Gets current User
         private async Task<AppUser> GetCurrentUser()

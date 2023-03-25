@@ -1,4 +1,5 @@
 ﻿using LinqToTwitter;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
@@ -9,6 +10,7 @@ using SMS_Marketing.Models;
 
 namespace SMS_Marketing.Controllers
 {
+    [Authorize]
     public class OrganizationController : Controller
     {
         #region "Properties"
@@ -116,7 +118,10 @@ namespace SMS_Marketing.Controllers
 
                     //Init Twitter API
                     TwitterAPI twitterAPI = new(postText, postPicture, url, twitterContext);
-                    bool result = await twitterAPI.PostTweet();
+
+                    //Posting to Twitter
+                    bool result = true;
+                    //bool result = await twitterAPI.PostTweet();
 
                     //If Tweet was posted successfully
                     if (result)
@@ -153,7 +158,7 @@ namespace SMS_Marketing.Controllers
                 }
                 else
                 {
-                    TempData["Error"] = "Please select a service.";
+                    TempData["Error"] += "Please select a service.";
                 }
                 return RedirectToAction("Index", new { id = id });
             }
