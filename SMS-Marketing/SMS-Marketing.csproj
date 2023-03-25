@@ -21,8 +21,4 @@
     <PackageReference Include="Twilio.AspNet.Core" Version="8.0.0" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Logs\" />
-  </ItemGroup>
-
 </Project>
