@@ -78,7 +78,7 @@ namespace SMS_Marketing.Controllers
             int? Id = id;
             Customer customer = new();
             customer.OrganizationId = Id.GetValueOrDefault();
-            customer.Name = FName;
+            customer.FirstName = FName;
             customer.LastName = LName;
             customer.PhoneNumber = PNum;
             if (TryValidateModel(customer))
