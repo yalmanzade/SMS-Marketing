@@ -1,4 +1,5 @@
 ﻿using LinqToTwitter;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
@@ -9,6 +10,7 @@ using SMS_Marketing.Models;
 
 namespace SMS_Marketing.Controllers
 {
+    [Authorize]
     public class OrganizationController : Controller
     {
         #region "Properties"
