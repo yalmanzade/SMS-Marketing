@@ -24,11 +24,11 @@ namespace SMS_Marketing.API
         }
         public string PostToTwilio(string? url, string? body, int? id, int? smsGroup)
         {
-            Models.TwilioAuth? twilioAuth = _context.TwilioAuth
+            Models.Organization? twilioAuth = _context.Organizations
                                         .Where(x => x.Id == id)
                                         .FirstOrDefault();
-            var authToken = "";
-            var accountSid = "";
+            var authToken = _context.AppSettings.First(p => p.Index == AppSettingsAccess.TwilioAuthToken).Value;
+            var accountSid = _context.AppSettings.First(p => p.Index == AppSettingsAccess.TwilioSID).Value;
             if (authToken == null) return "false";
             if (accountSid == null) return "false";
             if (twilioAuth == null) return "false";
@@ -45,7 +45,7 @@ namespace SMS_Marketing.API
                     var mediaUrl = new[] { new Uri(url) }.ToList();
                     var message = MessageResource.Create(
                     body: body,
-                    from: new Twilio.Types.PhoneNumber(twilioAuth.SendingNumber),
+                    from: new Twilio.Types.PhoneNumber(twilioAuth.TwilioPhoneNumber),
                     mediaUrl: mediaUrl,
                     to: new Twilio.Types.PhoneNumber(customer.PhoneNumber)
                     );
@@ -57,7 +57,7 @@ namespace SMS_Marketing.API
             {
                 var message = MessageResource.Create(
                             body: body,
-                            from: new Twilio.Types.PhoneNumber(twilioAuth.SendingNumber),
+                            from: new Twilio.Types.PhoneNumber(twilioAuth.TwilioPhoneNumber),
                             to: new Twilio.Types.PhoneNumber(customer.PhoneNumber)
                 );
                 Console.WriteLine($"Message to {customer.PhoneNumber} has been {message.Status}.");
