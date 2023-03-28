@@ -134,6 +134,12 @@ namespace SMS_Marketing.Controllers
                 {
                     _ = await PostToTwilio(url, postText, id, smsGroup);
                 }
+                if (post.OnFacebook)
+                {
+                    Organization? organization = await GetCurrentOrg(id);
+                    FacebookAPI facebook = new FacebookAPI(_context, _authContext, _userManager, _signInManager);
+                    await facebook.PostToFacebook(postText,postPicture, id);
+                }
 
                 //Checks to see if the post is Valid
                 if (post.IsServices)
@@ -202,7 +208,7 @@ namespace SMS_Marketing.Controllers
             {
                 string result;
                 FacebookAPI call = new FacebookAPI(_context, _authContext, _userManager, _signInManager);
-                result = await call.PostToFacebookImg(message, imageFile, id);
+                result = await call.PostToFacebook(message, imageFile, id);
                 ViewData["Result"] = result;
                 return true;
             }

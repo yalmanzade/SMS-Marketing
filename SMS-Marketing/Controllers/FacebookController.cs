@@ -86,7 +86,9 @@ namespace SMS_Marketing.Controllers
                 if (TryValidateModel(facebookAuth))
                 {
                     _context.FacebookAuth.Add(facebookAuth);
-                    _context.SaveChangesAsync();
+                    await _context.SaveChangesAsync();
+                    _context.Organizations.Where(e => e.Id == id).FirstOrDefault().IsFacebook = true;
+                    await _context.SaveChangesAsync();
                 }
                 if (!TryValidateModel(facebookAuth))
                     return RedirectToAction("Index", "Error");

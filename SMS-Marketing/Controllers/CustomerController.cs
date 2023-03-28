@@ -72,6 +72,8 @@ namespace SMS_Marketing.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Submit(int? id)
         {
+            try
+            {
             string FName = HttpContext.Request.Form["FirstNameInput"];
             string LName = HttpContext.Request.Form["LastNameInput"];
             string PNum = HttpContext.Request.Form["PhoneNumberInput"];
@@ -84,20 +86,41 @@ namespace SMS_Marketing.Controllers
             Group TempGroup = _context.Groups.Where(e => e.OrganizationId == id && e.IsDefault == true).FirstOrDefault();
             customer.GroupId = TempGroup.Id;
             customer.GroupName = TempGroup.Name;
-            var prefix = customer.PhoneNumber[..1];
+            var prefix = customer.PhoneNumber[..2];
             if (prefix != "+1")
             {
                 customer.PhoneNumber = "+1" + customer.PhoneNumber;
             }
-            if (TryValidateModel(customer))
-            {
-                _context.Customers.Add(customer);
-                _context.SaveChanges();
+                if (TryValidateModel(customer))
+                {
+                    var customerCompare = _context.Customers.Where(e => e.PhoneNumber == PNum && e.OrganizationId == Id);
+                    if (customerCompare == null)
+                    {
+                        _context.Customers.Add(customer);
+                        await _context.SaveChangesAsync();
+                        return RedirectToAction("Customers", "Organization", new { @id = id });
+                    }
+                    else
+                    {
+                        throw new Exception("Customer already exists in organization.");
+                    }
+                }
+                if (!TryValidateModel(customer))
+                {
+                    throw new Exception("Invalid data in Customer model.");
+                }
             }
-            if (!TryValidateModel(customer))
+            catch (Exception ex)
+            {
+                Error.InitializeError("Customer Creation Via OrgPortal", "100", ex.Message);
+                Error.LogError();
+                TempData["Error"] += ex.Message;
                 return RedirectToAction("Index", "Error");
-            return RedirectToAction("Customers", "Organization", new { @id = id });
+            }
+            TempData["Error"] += "Cannot determine error";
+            return RedirectToAction("Index", "Error");
         }
+
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Delete(int? id)

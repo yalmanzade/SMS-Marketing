@@ -22,7 +22,7 @@ namespace SMS_Marketing.API
             _context = context;
             _authContext = authDbContext;
         }
-        public async Task<String> PostToFacebookImg(string message, IFormFile imageFile, int? id)
+        public async Task<String> PostToFacebook(string message, IFormFile? imageFile, int? id)
         {
             FacebookAuth? facebookAuth = _context.FacebookAuth
                                                .Where(x => x.OrganizationId == id)
