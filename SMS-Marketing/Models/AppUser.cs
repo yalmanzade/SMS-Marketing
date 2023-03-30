@@ -58,7 +58,7 @@ namespace SMS_Marketing.Models
         public void IsAdmin()
         {
             if (this == null) throw new Exception("Please log in to perform this operation.");
-            //if (this.IsSystemManager == false) throw new NoUserAccessException(this.FirstName, "Admin Portal");
+            if (this.IsSystemManager == false) throw new NoUserAccessException(this.FirstName, "Admin Portal");
         }
     }
 
