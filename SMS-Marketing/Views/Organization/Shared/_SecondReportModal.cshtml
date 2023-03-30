@@ -1,0 +1,80 @@
+﻿<!-- Button trigger modal -->
+<button type="button" class="btn btn-primary btn-lg" data-bs-toggle="modal" data-bs-target="#secondreportModal">
+    <i class="fa-solid fa-chart-simple"></i>
+    View Report
+</button>
+
+<!-- Modal -->
+<div class="modal fade" id="secondreportModal" tabindex="-1" aria-labelledby="reportModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="reportModalLabel">Report Summary</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                @{
+                    if (Model == null || Model.Count < 1)
+                    {
+                        <p>There are no recent posts.</p>
+                    }
+                    else
+                    {
+                        <p class="fs-2">Usage Statistics</p>
+                        <p class="fs-5">The usage statistcs show all organization's data.</p>
+                        string dateString = DateTime.Today.ToString("yyyy-MM-dd");
+                        string currentmonth = dateString.Substring(4, 2);
+                        string postedmonth;
+                        int i = 0;
+                        int s = 0;
+                        int f = 0;
+                        int t = 0;
+                        int g = 0;
+                        int b = 0;
+                        int m = 0;
+                        foreach (var post in Model)
+                        {
+                            if (post.OnTwitter)
+                            {
+                                t++;
+                            }
+                            if (post.OnFacebook)
+                            {
+                                f++;
+                            }
+                            if (post.OnSMS)
+                            {
+                                s++;
+                            }
+                            if (post.Success == true)
+                            {
+                                g++;
+                            }
+                            if (post.Success == false)
+                            {
+                                b++;
+                            }
+                            postedmonth = post.PostedDate.ToString("yyyy-MM-dd");
+                            postedmonth = postedmonth.Substring(4, 2);
+                            if (currentmonth == postedmonth)
+                            {
+                                m++;
+                            }
+                            i++;
+                        }
+                        <p>Total Posts: @i</p>
+                        <p><i class="fa-brands fa-facebook-f"></i>  Posts: @f</p>
+                        <p><i class="fa-solid fa-comment"></i> Posts: @s</p>
+                        <p><i class="fa-brands fa-twitter"></i> Posts: @t</p>
+                        <p>Successful Posts: @g</p>
+                        <p>Failed Posts: @b</p>
+                        <p>Posts this month: @m</p>
+                    }    
+                }
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>

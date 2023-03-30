@@ -360,13 +360,14 @@ namespace SMS_Marketing.Controllers
 
         public async Task<ActionResult> Insights()
         {
+
             try
             {
                 //Authentication Starts
                 AppUser user = await GetCurrentUser();
-                user.IsAdmin();
+                user.IsAdmin()
                 // End Authentication
-
+                ViewBag.PostList = _context.Posts.ToList();
                 return View();
             }
             catch (NoUserAccessException ex)
