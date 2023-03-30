@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using SMS_Marketing.Areas.Identity.Data;
 using SMS_Marketing.Data;
 using SMS_Marketing.Models;
+using SMSMarketing.Data.Migrations;
 
 namespace SMS_Marketing.Controllers
 {
@@ -69,6 +70,30 @@ namespace SMS_Marketing.Controllers
                 TempData["Error"] = ex.Message;
             }
             return RedirectToAction("Index", "Error");
+        }
+        public async Task<IActionResult> DisableFacebook(int? id)
+        {
+            try
+            {
+                FacebookAuth facebook = await _context.FacebookAuth.Where(e => e.OrganizationId == id).FirstAsync();
+                if ( facebook != null)
+                {
+                    _context.FacebookAuth.Remove(facebook);
+                    await _context.SaveChangesAsync();
+                    return RedirectToAction("Index", "Organization", new { @id = id });
+                }
+                else
+                {
+                    throw new ArgumentNullException("No Connected facebook.");
+                }
+            }
+            catch(Exception ex) 
+            {
+                TempData["Error"] = ex.Message;
+                return RedirectToAction("Index", "Error");
+            }
+            TempData["Error"] = "Unhandled error, please try again. If error persists, please contact administrator";
+            RedirectToAction("Index", "Error");
         }
         [HttpPost]
         [ValidateAntiForgeryToken]
