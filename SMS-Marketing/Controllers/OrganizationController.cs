@@ -232,11 +232,11 @@ namespace SMS_Marketing.Controllers
             return credentialStore;
         }
 
-        /*private async Task<bool> PostToFacebookImage(string message, IFormFile imageFile, int? id)
+        private async Task<bool> PostToFacebookImage(string message, IFormFile imageFile, int? id)
         {
             try
             {
-                string result;
+                bool result;
                 FacebookAPI call = new FacebookAPI(_context, _authContext, _userManager, _signInManager);
                 result = await call.PostToFacebook(message, imageFile, id);
                 ViewData["Result"] = result;
@@ -249,7 +249,7 @@ namespace SMS_Marketing.Controllers
                 return false;
             }
             return false;
-        }*/
+        }
 
         //This method logs a post to the database.
         private async Task LogPost(Post post)
