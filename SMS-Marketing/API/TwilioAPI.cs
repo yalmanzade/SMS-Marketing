@@ -1,5 +1,4 @@
 ﻿using Microsoft.AspNetCore.Identity;
-using Microsoft.EntityFrameworkCore;
 using SMS_Marketing.Areas.Identity.Data;
 using SMS_Marketing.Data;
 using SMS_Marketing.Models;
@@ -25,11 +24,11 @@ namespace SMS_Marketing.API
         }
         public string PostToTwilio(string? url, string? body, int? id, int? smsGroup)
         {
-            Models.TwilioAuth? twilioAuth = _context.TwilioAuth
+            Models.Organization? twilioAuth = _context.Organizations
                                         .Where(x => x.Id == id)
                                         .FirstOrDefault();
-            var authToken = "";
-            var accountSid = "";
+            var authToken = _context.AppSettings.First(p => p.Index == AppSettingsAccess.TwilioAuthToken).Value;
+            var accountSid = _context.AppSettings.First(p => p.Index == AppSettingsAccess.TwilioSID).Value;
             if (authToken == null) return "false";
             if (accountSid == null) return "false";
             if (twilioAuth == null) return "false";
@@ -39,32 +38,43 @@ namespace SMS_Marketing.API
                         .ToList();
             TwilioClient.Init(accountSid, authToken);
             if (customers == null) return "false";
-            if (url != null)
+            try
             {
-                foreach (var customer in customers)
+                if (url != null)
                 {
-                    var mediaUrl = new[] { new Uri(url) }.ToList();
-                    var message = MessageResource.Create(
-                    body: body,
-                    from: new Twilio.Types.PhoneNumber(twilioAuth.SendingNumber),
-                    mediaUrl: mediaUrl,
-                    to: new Twilio.Types.PhoneNumber(customer.PhoneNumber)
-                    );
-                    Console.WriteLine($"Message to {customer.PhoneNumber} has been {message.Status}.");
-                    return "true";
+                    foreach (var customer in customers)
+                    {
+                        var mediaUrl = new[] { new Uri(url) }.ToList();
+                        var message = MessageResource.Create(
+                        body: body,
+                        from: new Twilio.Types.PhoneNumber(twilioAuth.TwilioPhoneNumber),
+                        mediaUrl: mediaUrl,
+                        to: new Twilio.Types.PhoneNumber(customer.PhoneNumber)
+                        );
+                        Console.WriteLine($"Message to {customer.PhoneNumber} has been {message.Status}.");
+                    }
                 }
-            }
-            foreach (Customer customer in customers)
-            {
-                var message = MessageResource.Create(
-                            body: body,
-                            from: new Twilio.Types.PhoneNumber(twilioAuth.SendingNumber),
-                            to: new Twilio.Types.PhoneNumber(customer.PhoneNumber)
-                );
-                Console.WriteLine($"Message to {customer.PhoneNumber} has been {message.Status}.");
+                else
+                {
+                    foreach (Customer customer in customers)
+                    {
+                        var message = MessageResource.Create(
+                                    body: body,
+                                    from: new Twilio.Types.PhoneNumber(twilioAuth.TwilioPhoneNumber),
+                                    to: new Twilio.Types.PhoneNumber(customer.PhoneNumber)
+                        );
+                        Console.WriteLine($"Message to {customer.PhoneNumber} has been {message.Status}.");
+                    }
+                }
                 return "true";
             }
-            return "false";
+            catch (Exception ex)
+            {
+                Error.InitializeError("Posting Twilio", "007", ex.Message);
+                Error.LogError();
+                return "false";
+            }
+
         }
     }
 }

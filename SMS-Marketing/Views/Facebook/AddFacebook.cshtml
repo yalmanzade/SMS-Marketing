@@ -1,6 +1,6 @@
 ﻿@model Organization
 @{
-    ViewData["Title"] = "Customers";
+    ViewData["Title"] = "Add Facebook";
 }
 <section class="container">
     <ul class="nav nav-tabs">
@@ -19,21 +19,21 @@
     </ul>
 </section>
 <section>
-    <form asp-action="Submit" asp-controller="Customer" asp-route-id="@Model.Id" method="post">
+    <form asp-action="Submit" asp-controller="Facebook" asp-route-id="@Model.Id" method="post">
         <div class="form-group">
-            <label for="FirstNameInput">Enter First Name: </label>
-            <input id="FirstNameInput"name="FirstNameInput"type="text" />
+            <label for="AppId">Enter Application ID: </label>
+            <input id="AppId"name="AppId"type="text" />
         </div>
         <div class="form-group">
-            <label for="LastNameInput">Enter Last Name: </label>
-            <input id="LastNameInput" name="LastNameInput" type="text" />
+            <label for="AccessToken">Enter Access Token: </label>
+            <input id="AccessToken" name="AccessToken" type="text" />
         </div>
         <div class="form-group">
-            <label for="PhoneNumberInput">Enter Phone Number: </label>
-            <input id="PhoneNumberInput" name="PhoneNumberInput" type="text"/>
-        </div>
+            <label for="UserScreenName">Enter User Screen Name: </label>
+            <input id="UserScreenName" name="UserScreenName" type="text"/>
+        </div
         <div class="form-group">
-            <input type="submit" value="Create Customer" class="btn btn-primary" />
+            <input type="submit" value="Create FacebookAuth" class="btn btn-primary" />
         </div>
     </form>
 </section>

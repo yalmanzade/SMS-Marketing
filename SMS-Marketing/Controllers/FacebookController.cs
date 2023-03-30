@@ -1,19 +1,21 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using SMS_Marketing.Areas.Identity.Data;
 using SMS_Marketing.Data;
 using SMS_Marketing.Models;
+using SMSMarketing.Data.Migrations;
 
 namespace SMS_Marketing.Controllers
 {
-    public class CustomerController : Controller
+    public class FacebookController : Controller
     {
         private readonly ApplicationDbContext _context;
         private readonly UserAuthDbContext _authContext;
         private readonly UserManager<AppUser> _userManager;
         private readonly SignInManager<AppUser> _signInManager;
 
-        public CustomerController(ApplicationDbContext context, UserAuthDbContext authDbContext,
+        public FacebookController(ApplicationDbContext context, UserAuthDbContext authDbContext,
                                          UserManager<AppUser> userManager, SignInManager<AppUser> signInManager)
         {
             _userManager = userManager;
@@ -50,26 +52,48 @@ namespace SMS_Marketing.Controllers
         {
             return View();
         }
-        public async Task<IActionResult> CreateCustomer(int? id)
+        #region Add Facebook Functionality
+        public async Task<IActionResult> AddFacebook(int? id)
         {
             try
             {
                 if (id != null)
                 {
                     var organization = await GetCurrentOrg(id);
-                    TempData["Success"] = "Customers Retrieved";
+                    TempData["Success"] = "Organization Retrieved";
                     return View(organization);
                 }
-                else
-                {
-                    throw new ArgumentNullException("Could not retrieve customer list, please retry.");
-                }
+
             }
             catch (Exception ex)
             {
-                TempData["Error"] = ex.ToString();
+                TempData["Error"] = ex.Message;
             }
             return RedirectToAction("Index", "Error");
+        }
+        public async Task<IActionResult> DisableFacebook(int? id)
+        {
+            try
+            {
+                FacebookAuth facebook = await _context.FacebookAuth.Where(e => e.OrganizationId == id).FirstAsync();
+                if ( facebook != null)
+                {
+                    _context.FacebookAuth.Remove(facebook);
+                    await _context.SaveChangesAsync();
+                    return RedirectToAction("Index", "Organization", new { @id = id });
+                }
+                else
+                {
+                    throw new ArgumentNullException("No Connected facebook.");
+                }
+            }
+            catch(Exception ex) 
+            {
+                TempData["Error"] = ex.Message;
+                return RedirectToAction("Index", "Error");
+            }
+            TempData["Error"] = "Unhandled error, please try again. If error persists, please contact administrator";
+            RedirectToAction("Index", "Error");
         }
         [HttpPost]
         [ValidateAntiForgeryToken]
@@ -77,50 +101,33 @@ namespace SMS_Marketing.Controllers
         {
             try
             {
-                string FName = HttpContext.Request.Form["FirstNameInput"];
-                string LName = HttpContext.Request.Form["LastNameInput"];
-                string PNum = HttpContext.Request.Form["PhoneNumberInput"];
-                int? Id = id;
-                Customer customer = new();
-                customer.OrganizationId = Id.GetValueOrDefault();
-                customer.FirstName = FName;
-                customer.LastName = LName;
-                customer.PhoneNumber = PNum;
-                Group TempGroup = _context.Groups.Where(e => e.OrganizationId == id && e.IsDefault == true).FirstOrDefault();
-                customer.GroupId = TempGroup.Id;
-                customer.GroupName = TempGroup.Name;
-                var prefix = customer.PhoneNumber[..2];
-                if (prefix != "+1")
+                string AppId = HttpContext.Request.Form["AppId"];
+                string AccessToken = HttpContext.Request.Form["AccessToken"];
+                string UserScreenName = HttpContext.Request.Form["UserScreenName"];
+                FacebookAuth facebookAuth = new FacebookAuth();
+                facebookAuth.OrganizationId = id.GetValueOrDefault();
+                facebookAuth.AppId = AppId;
+                facebookAuth.AccessToken = AccessToken;
+                facebookAuth.UserScreenName = UserScreenName;
+                if (TryValidateModel(facebookAuth))
                 {
-                    customer.PhoneNumber = "+1" + customer.PhoneNumber;
-                }
-                if (TryValidateModel(customer))
-                {
-                    await _context.Customers.AddAsync(customer);
+                    await _context.FacebookAuth.AddAsync(facebookAuth);
                     await _context.SaveChangesAsync();
-                    return RedirectToAction("Customers", "Organization", new { @id = id });
+                    return RedirectToAction("Index", "Organization", new { @id = id });
                 }
-                if (!TryValidateModel(customer))
+                else
                 {
-                    throw new ArgumentException("Customer contains invalid data and could not be added. Please retry.");
+                    throw new ArgumentException("Invalid information passed to facebook addition model. Please contact an administrator");
                 }
             }
             catch (Exception ex)
             {
-                TempData["Error"] = ex.ToString();
+                TempData["Error"] = ex.Message;
                 return RedirectToAction("Index", "Error");
             }
-            TempData["Error"] = "Unhandled error, please contact an administrator";
+            TempData["Error"] = "Unhandled Error. Please contact an Administrator";
             return RedirectToAction("Index", "Error");
         }
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Delete(int? id)
-        {
-            var customer = _context.Customers.Where(e => e.Id == id).FirstOrDefault();
-            customer.IsActive = false;
-            await _context.SaveChangesAsync();
-            return RedirectToAction("Customers", "Organization", new { @id = customer.OrganizationId });
-        }
+        #endregion
     }
 }

@@ -25,5 +25,7 @@ namespace SMS_Marketing.Models
         static public int AllowImages { get; set; } = 2;
         static public int FacebookAccessToken { get; set; } = 3;
         static public int FacebookAppId { get; set; } = 4;
+        static public int TwilioAuthToken { get; set; } = 5;
+        static public int TwilioSID { get; set; } = 6;
     }
 }

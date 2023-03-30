@@ -26,30 +26,54 @@
 <section class="container">
     <div class="row">
         <div class="col">
-            <partial name="../Organization/Shared/_OrgPost.cshtml" for="@Model" />
-            @*<partial name="_OrgPost" model="Model"/>*@
+            @{
+                if (Model.CurrentUser.IsPost)
+                {
+                    <partial name="../Organization/Shared/_OrgPost.cshtml" for="@Model" />
+                }
+                else
+                {
+                    <partial name="../Organization/Shared/_NoAccess.cshtml" for="@Model.ManagerName" />
+                }
+            }
         </div>
         <div class="col">
             <section class="container pt-2 ml-0">
                 <partial name="../Organization/Shared/_Qr.cshtml" for="@Model" />
             </section>
-            <section class="container pt-2">
-                <p class="fs-2">Your Services</p>
-            </section>
-            <section class="container">
-                <div class="row pb-1">
-                    <div class="col col-auto">
-                        <a class="btn btn-primary btn-lg" asp-controller="Twitter" asp-action="Login" asp-route-id="@Model.Id">
-                            <i class="fa-brands fa-square-twitter"></i>
-                            Use Twitter</a>
-                    </div>
-                    <div class="col col-auto">
-                        <a class="btn btn-danger btn-lg" asp-controller="Twitter" asp-action="Disable" asp-route-id="@Model.Id">
-                            <i class="fa-solid fa-square-minus"></i>
-                            Disable Twitter</a>
-                    </div>
-                </div>
-            </section>
+
+            @{
+                if (Model.CurrentUser.IsPost)
+                {
+                    <section class="container pt-2">
+                        <p class="fs-2">Your Services</p>
+                    </section>
+                    <section class="container">
+                        <div class="row pb-1">
+                            <div class="col col-auto">
+                                <a class="btn btn-primary btn-lg" asp-controller="Twitter" asp-action="Login" asp-route-id="@Model.Id">
+                                    <i class="fa-brands fa-square-twitter"></i>
+                                    Use Twitter</a>
+                            </div>
+                            <div class="col col-auto">
+                                <a class="btn btn-danger btn-lg" asp-controller="Twitter" asp-action="Disable" asp-route-id="@Model.Id">
+                                    <i class="fa-solid fa-square-minus"></i>
+                                    Disable Twitter</a>
+                            </div>
+                        </div>
+                        <div class="row pb-1">
+                            <div class="col col-auto">
+                                <a class="btn btn-primary btn-lg" asp-controller="Facebook" asp-action="AddFacebook"
+                                 asp-route-Id="@Model.Id"><i class="fa-brands fa-square-facebook"></i>Add Facebook</a>
+                            </div>
+                            <div class ="col col-auto">
+                                <a class="btn btn-danger btn-lg" asp-controller="Facebook" asp-action="DisableFacebook"
+                                asp-route-Id="@Model.Id"><i class="fa-solid fa-square-minus"></i>Disable Facebook</a>
+                            </div>
+                        </div>
+                    </section>
+                }   
+            }
         </div>
     </div>
 </section>

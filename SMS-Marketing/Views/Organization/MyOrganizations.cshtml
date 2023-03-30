@@ -7,14 +7,14 @@
         List<Organization> organizations = ViewBag.OrganizationList;
         if (organizations.Count == 0)
         {
-            <p>There are no Organizations.</p>
+            <p class="fs-2">There are no Organizations.</p>
         }
         else
         {
-            <p>Choose an organization to manage.</p>
+            <p class="fs-2">Choose an organization to manage.</p>
             foreach (var organization in organizations)
             {
-                <a href="/Organization/Index/@organization.Id" class="btn btn-primary" style="width:150px">
+                <a href="/Organization/Index/@organization.Id" class="btn btn-primary btn-lg">
                     @organization.Name
                 </a>
             }

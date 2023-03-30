@@ -18,10 +18,7 @@
     <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="7.0.2" />
     <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="7.0.3" />
     <PackageReference Include="Twilio" Version="6.2.4" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Logs\" />
+    <PackageReference Include="Twilio.AspNet.Core" Version="8.0.0" />
   </ItemGroup>
 
 </Project>
