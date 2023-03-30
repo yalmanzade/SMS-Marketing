@@ -53,7 +53,11 @@ namespace SMS_Marketing.Models
         {
             get
             {
-                return OnTwitter || OnSMS || OnFacebook;
+                if (!OnSMS && !OnTwitter && !OnFacebook)
+                {
+                    return false;
+                }
+                return true;
             }
         }
     }
