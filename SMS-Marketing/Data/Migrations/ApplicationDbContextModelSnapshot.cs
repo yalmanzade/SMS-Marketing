@@ -252,40 +252,6 @@ namespace SMSMarketing.Data.Migrations
                     b.ToTable("AppSettings");
                 });
 
-            modelBuilder.Entity("SMS_Marketing.Models.Authorization", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<bool>("IsActive")
-                        .HasColumnType("bit");
-
-                    b.Property<bool>("IsCustomerManagment")
-                        .HasColumnType("bit");
-
-                    b.Property<bool>("IsInsight")
-                        .HasColumnType("bit");
-
-                    b.Property<bool>("IsPost")
-                        .HasColumnType("bit");
-
-                    b.Property<bool>("IsUserManagement")
-                        .HasColumnType("bit");
-
-                    b.Property<int>("OrganizationId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("UserId")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("Authorization");
-                });
-
             modelBuilder.Entity("SMS_Marketing.Models.Customer", b =>
                 {
                     b.Property<int>("Id")
@@ -299,10 +265,12 @@ namespace SMSMarketing.Data.Migrations
                         .HasMaxLength(20)
                         .HasColumnType("nvarchar(20)");
 
-                    b.Property<int?>("GroupId")
+                    b.Property<int>("GroupId")
+
                         .HasColumnType("int");
 
                     b.Property<string>("GroupName")
+                        .IsRequired()
                         .HasMaxLength(20)
                         .HasColumnType("nvarchar(20)");
 
@@ -365,8 +333,8 @@ namespace SMSMarketing.Data.Migrations
 
                     b.Property<string>("Description")
                         .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
 
                     b.Property<bool>("IsDefault")
                         .HasColumnType("bit");

@@ -1,4 +1,6 @@
-﻿using Microsoft.AspNetCore.Identity;
+﻿// This controller is the shared or public view of the Website
+// Users do not need to be logged in to access these actions/resources.
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using SMS_Marketing.Areas.Identity.Data;
@@ -43,10 +45,14 @@ namespace SMS_Marketing.Controllers
                 if (id == null) throw new Exception("This organization is not valid.");
                 Organization? organization = await _context.Organizations.FindAsync(id);
                 if (organization == null) throw new Exception("Organization not found.");
+                FacebookAuth? facebook = _context.FacebookAuth.Where(e => e.OrganizationId == id).FirstOrDefault();
+                TwitterAuth? twitter = _context.TwitterAuth.Where(e => e.OrganizationId == id).FirstOrDefault();
                 Customer customer = new()
                 {
                     OrganizationId = organization.Id,
-                    Organization = organization
+                    Organization = organization,
+                    Facebook = facebook,
+                    Twitter = twitter
                 };
                 return View(customer);
             }
@@ -65,10 +71,11 @@ namespace SMS_Marketing.Controllers
         {
             try
             {
+                //Customer Form includes the Organi
                 if (customerForm == null) throw new Exception("Invalid Data. Please try again.");
                 if (ModelState.IsValid)
                 {
-                    var prefix = customerForm.PhoneNumber.Substring(0, 1);
+                    var prefix = customerForm.PhoneNumber[..1];
                     if (prefix != "+1")
                     {
                         customerForm.PhoneNumber = "+1" + customerForm.PhoneNumber;
@@ -92,7 +99,6 @@ namespace SMS_Marketing.Controllers
                         GroupId = group.Id,
                         GroupName = group.Name,
                         PhoneNumber = customerForm.PhoneNumber,
-                        //Email = customerForm.Email
                     };
                     await _context.AddAsync(newCustomer);
                     await _context.SaveChangesAsync();

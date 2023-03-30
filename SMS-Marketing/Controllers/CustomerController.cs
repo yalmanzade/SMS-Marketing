@@ -50,7 +50,7 @@ namespace SMS_Marketing.Controllers
         {
             return View();
         }
-        public async Task<IActionResult> CreateCustomer(int? id)//
+        public async Task<IActionResult> CreateCustomer(int? id)
         {
             try
             {
@@ -81,6 +81,14 @@ namespace SMS_Marketing.Controllers
             customer.FirstName = FName;
             customer.LastName = LName;
             customer.PhoneNumber = PNum;
+            Group TempGroup = _context.Groups.Where(e => e.OrganizationId == id && e.IsDefault == true).FirstOrDefault();
+            customer.GroupId = TempGroup.Id;
+            customer.GroupName = TempGroup.Name;
+            var prefix = customer.PhoneNumber[..1];
+            if (prefix != "+1")
+            {
+                customer.PhoneNumber = "+1" + customer.PhoneNumber;
+            }
             if (TryValidateModel(customer))
             {
                 _context.Customers.Add(customer);
