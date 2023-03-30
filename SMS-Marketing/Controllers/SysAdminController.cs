@@ -365,7 +365,7 @@ namespace SMS_Marketing.Controllers
             {
                 //Authentication Starts
                 AppUser user = await GetCurrentUser();
-                user.IsAdmin()
+                user.IsAdmin();
                 // End Authentication
                 ViewBag.PostList = _context.Posts.ToList();
                 return View();
