@@ -74,7 +74,8 @@ namespace SMS_Marketing.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Submit(int? id)
         {
-
+            try
+            {
                 string AppId = HttpContext.Request.Form["AppId"];
                 string AccessToken = HttpContext.Request.Form["AccessToken"];
                 string UserScreenName = HttpContext.Request.Form["UserScreenName"];
@@ -85,12 +86,22 @@ namespace SMS_Marketing.Controllers
                 facebookAuth.UserScreenName = UserScreenName;
                 if (TryValidateModel(facebookAuth))
                 {
-                    _context.FacebookAuth.Add(facebookAuth);
-                    _context.SaveChangesAsync();
+                    await _context.FacebookAuth.AddAsync(facebookAuth);
+                    await _context.SaveChangesAsync();
+                    return RedirectToAction("Index", "Organization", new { @id = id });
                 }
-                if (!TryValidateModel(facebookAuth))
-                    return RedirectToAction("Index", "Error");
-            return RedirectToAction("Index", "Organization", new { @id = id });
+                else
+                {
+                    throw new ArgumentException("Invalid information passed to facebook addition model. Please contact an administrator");
+                }
+            }
+            catch (Exception ex)
+            {
+                TempData["Error"] = ex.Message;
+                return RedirectToAction("Index", "Error");
+            }
+            TempData["Error"] = "Unhandled Error. Please contact an Administrator";
+            return RedirectToAction("Index", "Error");
         }
         #endregion
     }
