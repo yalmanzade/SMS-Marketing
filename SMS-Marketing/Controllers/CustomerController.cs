@@ -84,7 +84,7 @@ namespace SMS_Marketing.Controllers
             Group TempGroup = _context.Groups.Where(e => e.OrganizationId == id && e.IsDefault == true).FirstOrDefault();
             customer.GroupId = TempGroup.Id;
             customer.GroupName = TempGroup.Name;
-            var prefix = customer.PhoneNumber[..1];
+            var prefix = customer.PhoneNumber[..2];
             if (prefix != "+1")
             {
                 customer.PhoneNumber = "+1" + customer.PhoneNumber;
