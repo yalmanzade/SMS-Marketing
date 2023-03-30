@@ -261,7 +261,7 @@ namespace SMS_Marketing.Controllers
             }
         }
 
-        private Post InitPost(IFormCollection collection)
+        private static Post InitPost(IFormCollection collection)
         {
             Post post = new Post();
             try

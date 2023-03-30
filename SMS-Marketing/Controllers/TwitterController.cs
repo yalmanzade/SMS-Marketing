@@ -169,6 +169,32 @@ namespace SMS_Marketing.Controllers
 
         #endregion
 
+        #region Twitter Service Management
+
+        public async Task<ActionResult> Disable(int? id)
+        {
+            try
+            {
+                if (id == null) throw new Exception("Invalid Organization ID");
+                Organization? organization = await GetCurrentOrg(id);
+                if (organization == null) throw new Exception("Invalid Organization ID");
+                organization.IsTwitter = false;
+                _context.Organizations.Update(organization);
+                //await _context.SaveChangesAsync();
+                TempData["Success"] += "Successfully Disabled Twitter.";
+                return RedirectToAction("Index", "Organization", new { id = id });
+            }
+            catch (Exception ex)
+            {
+                Error.InitializeError("Disable Twitter", id.ToString(), ex.Message);
+                Error.LogError();
+                TempData["Error"] += ex.Message;
+                return RedirectToAction("Index", "Error");
+            }
+        }
+
+        #endregion
+
         #region Helper Methods
 
         private async Task<ActionResult> SaveTwitterOrgChanges(int organizationId)
