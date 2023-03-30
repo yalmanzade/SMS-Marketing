@@ -7,6 +7,7 @@ using SMS_Marketing.API;
 using SMS_Marketing.Areas.Identity.Data;
 using SMS_Marketing.Data;
 using SMS_Marketing.Models;
+using Twilio.TwiML.Messaging;
 
 namespace SMS_Marketing.Controllers
 {
@@ -100,6 +101,11 @@ namespace SMS_Marketing.Controllers
             {
                 //Creates new post object for our records.
                 Post post = InitPost(collection);
+                if (post.IsServices == false)
+                {
+                    TempData["Error"] += "You did not select a service.";
+                    return RedirectToAction("Index", "Organization", new { @id = id });
+                }
 
                 //Checks if we need to post to Twitter
                 if (post.OnTwitter)
@@ -137,15 +143,18 @@ namespace SMS_Marketing.Controllers
 
                 if (post.OnSMS)
                 {
-                    bool result = await PostToTwilio(url, postText, id, smsGroup);
+                    //bool result = await PostToTwilio(url, postText, id, smsGroup);
+                    TwilioAPI twilioAPI = new TwilioAPI(_context, _authContext, _userManager, _signInManager);
+                    bool result = twilioAPI.PostToTwilio(url, postText, id, smsGroup);
                     if (result == true)
                     {
                         TempData["Success"] += "Texts were sent successfully.";
+                        post.OnSMS = true;
                     }
                     else
                     {
-                        post.OnTwitter = false;
                         TempData["Error"] += "Failed to send texts.";
+                        post.OnSMS = false;
                     }
                 }
 
@@ -167,18 +176,17 @@ namespace SMS_Marketing.Controllers
                 }
                 else
                 {
-                    TempData["Error"] += "Please select a service.";
+                    TempData["Error"] += "Could not post";
                 }
                 return RedirectToAction("Index", new { id = id });
             }
             catch (Exception ex)
             {
                 TempData["Error"] += ex.Message;
-                RedirectToAction("Index", "Error");
+                return RedirectToAction("Index", "Error");
             }
 
-            TempData["Error"] += "Unexpected Error.";
-            return RedirectToAction("Index", "Organization", new { @id = id });
+            
         }
 
         public async Task<SessionStateCredentialStore> GetCredentialStore(int? id)
@@ -225,30 +233,6 @@ namespace SMS_Marketing.Controllers
                 Error.InitializeError("Fa", "100", ex.Message);
                 Error.LogError();
                 return false;
-            }
-            return false;
-        }
-
-        private async Task<bool> PostToTwilio(string? url, string? body, int? id, int? smsGroup)
-        {
-            try
-            {
-                string result;
-                TwilioAPI twilioAPI = new TwilioAPI(_context, _authContext, _userManager, _signInManager);
-                result = twilioAPI.PostToTwilio(url, body, id, smsGroup);
-                if (result == "false")
-                {
-                    return false;
-                }
-                else if (result == "true")
-                {
-                    return true;
-                }
-            }
-            catch (Exception ex)
-            {
-                TempData["Error"] = ex.Message;
-                RedirectToAction("Index", "Error");
             }
             return false;
         }
