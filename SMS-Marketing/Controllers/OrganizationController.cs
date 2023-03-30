@@ -159,7 +159,7 @@ namespace SMS_Marketing.Controllers
                     else
                     {
                         post.OnFacebook = false;
-                        TempData["Errpr"] += " Facebook failed to post.";
+                        TempData["Error"] += " Facebook failed to post.";
                     }
                 }
 
@@ -224,11 +224,11 @@ namespace SMS_Marketing.Controllers
             return credentialStore;
         }
 
-        /*private async Task<bool> PostToFacebookImage(string message, IFormFile imageFile, int? id)
+        private async Task<bool> PostToFacebookImage(string message, IFormFile imageFile, int? id)
         {
             try
             {
-                string result;
+                bool result;
                 FacebookAPI call = new FacebookAPI(_context, _authContext, _userManager, _signInManager);
                 result = await call.PostToFacebook(message, imageFile, id);
                 ViewData["Result"] = result;
@@ -241,7 +241,7 @@ namespace SMS_Marketing.Controllers
                 return false;
             }
             return false;
-        }*/
+        }
 
         private async Task<bool> PostToTwilio(string? url, string? body, int? id, int? smsGroup)
         {
