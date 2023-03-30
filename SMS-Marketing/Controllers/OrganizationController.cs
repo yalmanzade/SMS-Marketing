@@ -137,7 +137,16 @@ namespace SMS_Marketing.Controllers
 
                 if (post.OnSMS)
                 {
-                    _ = await PostToTwilio(url, postText, id, smsGroup);
+                    bool result = await PostToTwilio(url, postText, id, smsGroup);
+                    if (result == true)
+                    {
+                        TempData["Success"] += "Texts were sent successfully.";
+                    }
+                    else
+                    {
+                        post.OnTwitter = false;
+                        TempData["Error"] += "Failed to send texts.";
+                    }
                 }
 
                 //Checks to see if the post is Valid
