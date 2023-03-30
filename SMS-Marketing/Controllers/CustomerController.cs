@@ -60,11 +60,14 @@ namespace SMS_Marketing.Controllers
                     TempData["Success"] = "Customers Retrieved";
                     return View(organization);
                 }
-
+                else
+                {
+                    throw new ArgumentNullException("Could not retrieve customer list, please retry.");
+                }
             }
             catch (Exception ex)
             {
-                TempData["Error"] = ex.Message;
+                TempData["Error"] = ex.ToString();
             }
             return RedirectToAction("Index", "Error");
         }
@@ -72,31 +75,43 @@ namespace SMS_Marketing.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Submit(int? id)
         {
-            string FName = HttpContext.Request.Form["FirstNameInput"];
-            string LName = HttpContext.Request.Form["LastNameInput"];
-            string PNum = HttpContext.Request.Form["PhoneNumberInput"];
-            int? Id = id;
-            Customer customer = new();
-            customer.OrganizationId = Id.GetValueOrDefault();
-            customer.FirstName = FName;
-            customer.LastName = LName;
-            customer.PhoneNumber = PNum;
-            Group TempGroup = _context.Groups.Where(e => e.OrganizationId == id && e.IsDefault == true).FirstOrDefault();
-            customer.GroupId = TempGroup.Id;
-            customer.GroupName = TempGroup.Name;
-            var prefix = customer.PhoneNumber[..2];
-            if (prefix != "+1")
+            try
             {
-                customer.PhoneNumber = "+1" + customer.PhoneNumber;
+                string FName = HttpContext.Request.Form["FirstNameInput"];
+                string LName = HttpContext.Request.Form["LastNameInput"];
+                string PNum = HttpContext.Request.Form["PhoneNumberInput"];
+                int? Id = id;
+                Customer customer = new();
+                customer.OrganizationId = Id.GetValueOrDefault();
+                customer.FirstName = FName;
+                customer.LastName = LName;
+                customer.PhoneNumber = PNum;
+                Group TempGroup = _context.Groups.Where(e => e.OrganizationId == id && e.IsDefault == true).FirstOrDefault();
+                customer.GroupId = TempGroup.Id;
+                customer.GroupName = TempGroup.Name;
+                var prefix = customer.PhoneNumber[..2];
+                if (prefix != "+1")
+                {
+                    customer.PhoneNumber = "+1" + customer.PhoneNumber;
+                }
+                if (TryValidateModel(customer))
+                {
+                    await _context.Customers.AddAsync(customer);
+                    await _context.SaveChangesAsync();
+                    return RedirectToAction("Customers", "Organization", new { @id = id });
+                }
+                if (!TryValidateModel(customer))
+                {
+                    throw new ArgumentException("Customer contains invalid data and could not be added. Please retry.");
+                }
             }
-            if (TryValidateModel(customer))
+            catch (Exception ex)
             {
-                _context.Customers.Add(customer);
-                _context.SaveChanges();
-            }
-            if (!TryValidateModel(customer))
+                TempData["Error"] = ex.ToString();
                 return RedirectToAction("Index", "Error");
-            return RedirectToAction("Customers", "Organization", new { @id = id });
+            }
+            TempData["Error"] = "Unhandled error, please contact an administrator";
+            return RedirectToAction("Index", "Error");
         }
         [HttpPost]
         [ValidateAntiForgeryToken]
@@ -104,7 +119,7 @@ namespace SMS_Marketing.Controllers
         {
             var customer = _context.Customers.Where(e => e.Id == id).FirstOrDefault();
             customer.IsActive = false;
-            _context.SaveChanges();
+            await _context.SaveChangesAsync();
             return RedirectToAction("Customers", "Organization", new { @id = customer.OrganizationId });
         }
     }

@@ -61,9 +61,15 @@
                                     Disable Twitter</a>
                             </div>
                         </div>
-                        <div>
-                            <a class= "btn btn-primary btn-lg" asp-controller="Facebook" asp-action="AddFacebook" 
-                            asp-route-Id="@Model.Id">Add Facebook</a>
+                        <div class="row pb-1">
+                            <div class="col col-auto">
+                                <a class="btn btn-primary btn-lg" asp-controller="Facebook" asp-action="AddFacebook"
+                                 asp-route-Id="@Model.Id"><i class="fa-brands fa-square-facebook"></i>Add Facebook</a>
+                            </div>
+                            <div class ="col col-auto">
+                                <a class="btn btn-danger btn-lg" asp-controller="Facebook" asp-action="DisableFacebook"
+                                asp-route-Id="@Model.Id"><i class="fa-solid fa-square-minus"></i>Disable Facebook</a>
+                            </div>
                         </div>
                     </section>
                 }   

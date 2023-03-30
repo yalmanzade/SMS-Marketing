@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using SMS_Marketing.Areas.Identity.Data;
 using SMS_Marketing.Data;
 using SMS_Marketing.Models;
+using SMSMarketing.Data.Migrations;
 
 namespace SMS_Marketing.Controllers
 {
@@ -70,11 +71,36 @@ namespace SMS_Marketing.Controllers
             }
             return RedirectToAction("Index", "Error");
         }
+        public async Task<IActionResult> DisableFacebook(int? id)
+        {
+            try
+            {
+                FacebookAuth facebook = await _context.FacebookAuth.Where(e => e.OrganizationId == id).FirstAsync();
+                if ( facebook != null)
+                {
+                    _context.FacebookAuth.Remove(facebook);
+                    await _context.SaveChangesAsync();
+                    return RedirectToAction("Index", "Organization", new { @id = id });
+                }
+                else
+                {
+                    throw new ArgumentNullException("No Connected facebook.");
+                }
+            }
+            catch(Exception ex) 
+            {
+                TempData["Error"] = ex.Message;
+                return RedirectToAction("Index", "Error");
+            }
+            TempData["Error"] = "Unhandled error, please try again. If error persists, please contact administrator";
+            RedirectToAction("Index", "Error");
+        }
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Submit(int? id)
         {
-
+            try
+            {
                 string AppId = HttpContext.Request.Form["AppId"];
                 string AccessToken = HttpContext.Request.Form["AccessToken"];
                 string UserScreenName = HttpContext.Request.Form["UserScreenName"];
@@ -85,12 +111,22 @@ namespace SMS_Marketing.Controllers
                 facebookAuth.UserScreenName = UserScreenName;
                 if (TryValidateModel(facebookAuth))
                 {
-                    _context.FacebookAuth.Add(facebookAuth);
-                    _context.SaveChangesAsync();
+                    await _context.FacebookAuth.AddAsync(facebookAuth);
+                    await _context.SaveChangesAsync();
+                    return RedirectToAction("Index", "Organization", new { @id = id });
                 }
-                if (!TryValidateModel(facebookAuth))
-                    return RedirectToAction("Index", "Error");
-            return RedirectToAction("Index", "Organization", new { @id = id });
+                else
+                {
+                    throw new ArgumentException("Invalid information passed to facebook addition model. Please contact an administrator");
+                }
+            }
+            catch (Exception ex)
+            {
+                TempData["Error"] = ex.Message;
+                return RedirectToAction("Index", "Error");
+            }
+            TempData["Error"] = "Unhandled Error. Please contact an Administrator";
+            return RedirectToAction("Index", "Error");
         }
         #endregion
     }
