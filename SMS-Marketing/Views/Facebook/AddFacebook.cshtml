@@ -22,15 +22,15 @@
     <form asp-action="Submit" asp-controller="Facebook" asp-route-id="@Model.Id" method="post">
         <div class="form-group">
             <label for="AppId">Enter Application ID: </label>
-            <input id="AppId"name="AppId"type="text" />
+            <input id="AppId"name="AppId"type="text" required/>
         </div>
         <div class="form-group">
             <label for="AccessToken">Enter Access Token: </label>
-            <input id="AccessToken" name="AccessToken" type="text" />
+            <input id="AccessToken" name="AccessToken" type="text" required/>
         </div>
         <div class="form-group">
             <label for="UserScreenName">Enter User Screen Name: </label>
-            <input id="UserScreenName" name="UserScreenName" type="text"/>
+            <input id="UserScreenName" name="UserScreenName" type="text" required/>
         </div
         <div class="form-group">
             <input type="submit" value="Create FacebookAuth" class="btn btn-primary" />
