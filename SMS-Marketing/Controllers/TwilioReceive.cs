@@ -36,11 +36,12 @@ namespace SMS_Marketing.Controllers
 			string number = incomingMessage.From;
 			string sendingnum = incomingMessage.To;
 			string subscribeMessage = "subscribe";
+			string unsubscribeMessage = "unsubscribe";
+			
+
 
 			//check to see if number is in database
-			bool subscribed = false;//needs to be removed
-									//check to see if number has name
-			bool hasName = false;//needs to be removed
+			
 			string customersName = "";
 
 			Organization organization = _context.Organizations.FirstOrDefault(org => org.TwilioPhoneNumber.Replace(" ", "") == sendingnum);
@@ -51,17 +52,20 @@ namespace SMS_Marketing.Controllers
 			var messagingResponse = new MessagingResponse();
 			if (customer != null)
 			{
-				if (IsFullName(incomingMessage.Body) == true)//&& subscribed
+				if (IsFullName(incomingMessage.Body) == true)
 				{
+					
 					//we take name and send to database here
 					customersName = incomingMessage.Body;
 					messagingResponse.Message($"Thank You {customersName} you will now recieve messages from {orgName}");
+					
 					string[] nameParts = customersName.Split(new[] { ',', ' ' }, StringSplitOptions.RemoveEmptyEntries);
 					string firstName = nameParts[0].Trim().Substring(0, Math.Min(nameParts[0].Trim().Length, 30));
 					string lastName = nameParts.Length > 1 ? nameParts[1].Trim().Substring(0, Math.Min(nameParts[1].Trim().Length, 20)) : "";
 
 					//subscribed = true;//Needs top be removed
 					//need to write logic to take name and add to existing coustomers
+					customer.IsActive = true;
 					customer.FirstName = firstName;
 					customer.LastName = lastName;
 					if (TryValidateModel(customer))
@@ -74,27 +78,98 @@ namespace SMS_Marketing.Controllers
 					{
 						messagingResponse.Message($"Sorry {sendingnum} We are having a problem subscribing you.");
 					}
+
 					return TwiML(messagingResponse);
 				}
 				else
 				{
+					if (incomingMessage.Body.ToLower().Replace(" ", "") == "unstop" && customer.IsActive == false)
+					{
+						customer.IsActive = true;
+						if (TryValidateModel(customer))
+						{
+							_context.Customers.Update(customer);
 
-					messagingResponse.Message($"If you are trying to subscribe to {orgName} Please respond with the join message {subscribeMessage} if you are trying to give us your name please send in format First Last");
+							_context.SaveChanges();
+						}
+						messagingResponse.Message($"{customer.FirstName} you are resubscribed to {orgName}.");
+						return TwiML(messagingResponse);
+					}
+					else if (incomingMessage.Body.ToLower().Replace(" ", "") == "start" && customer.IsActive == false)
+					{
+						customer.IsActive = true;
+						if (TryValidateModel(customer))
+						{
+							_context.Customers.Update(customer);
 
-					return TwiML(messagingResponse);
+							_context.SaveChanges();
+						}
+						messagingResponse.Message($"{customer.FirstName} you are resubscribed to {orgName}.");
+						return TwiML(messagingResponse);
+					}
+					else if(incomingMessage.Body.ToLower().Replace(" ", "") == subscribeMessage && customer.IsActive == false)
+					{
+						customer.IsActive = true;
+						if (TryValidateModel(customer))
+						{
+							_context.Customers.Update(customer);
+
+							_context.SaveChanges();
+						}
+						messagingResponse.Message($"{customer.FirstName} you are resubscribed to {orgName}.");
+						return TwiML(messagingResponse);
+					}
+					else
+					{
+
+						switch (incomingMessage.Body.ToUpper().Replace(" ", ""))
+						{
+							case "STOP":
+							case "STOP ALL":
+							case "QUIT":
+							case "UNSUBSCRIBE":
+							case "CANCEL":
+							case "END":
+							case "OPT-OUT":
+								{
+									if (!customer.IsActive)
+									{
+										messagingResponse.Message($"You are already unsubscribed from {orgName}.");
+										return TwiML(messagingResponse);
+									}
+
+									customer.IsActive = false;
+									if (TryValidateModel(customer))
+									{
+										_context.Customers.Update(customer);
+										_context.SaveChanges();
+
+										messagingResponse.Message($"{customer.FirstName} you are unsubscribed from {orgName}.");
+										return TwiML(messagingResponse);
+									}
+									else
+									{
+										messagingResponse.Message("Failed to unsubscribe. Please try again later.");
+										return TwiML(messagingResponse);
+									}
+								}
+							default:
+								{
+									messagingResponse.Message($"If you are trying to subscribe to {orgName}, please respond with the join message '{subscribeMessage}'. If you are trying to give us your name, please send it in the format 'First Last'. If you would like to unsubscribe, type '{unsubscribeMessage}'.");
+									return TwiML(messagingResponse);
+								}
+						}
+
+
+					}
 				}
-
-
-				//else
-				messagingResponse.Message($"{sendingnum} you are already subscribed to {orgName}.");
-				return TwiML(messagingResponse);
 			}
 			else
 			{
 
 				if (incomingMessage.Body.ToLower().Replace(" ", "") == subscribeMessage)
 				{
-					messagingResponse.Message($"Thank You {sendingnum} for subscribing to {orgName}. Please Tell us your Name in the format First, Last");
+					messagingResponse.Message($"Thank You {sendingnum} for subscribing to {orgName}. Please Tell us your Name in the format 'First Last'");
 					Customer tempcustomer = new();
 					int organizationId = OrgsId.GetValueOrDefault();
 					tempcustomer.OrganizationId = organizationId;
@@ -126,7 +201,7 @@ namespace SMS_Marketing.Controllers
 				else
 				{
 
-					messagingResponse.Message($"If you are trying to subscribe to {orgName} Please respond with the join message {subscribeMessage} if you are trying to give us your name please send in format First, Last Bottom");//remove bottom later
+					messagingResponse.Message($"If you are trying to subscribe to {orgName} Please respond with the join message '{subscribeMessage}' if you are trying to give us your name please send in format 'First Last' if you would like to unsubscribe type '{unsubscribeMessage}' ");//remove bottom later
 
 					return TwiML(messagingResponse);
 
@@ -139,7 +214,7 @@ namespace SMS_Marketing.Controllers
 
 		public static bool IsFullName(string str)
 		{
-			string pattern = @"^[A-Za-z]+([, ]+[A-Za-z]+)?$";
+			string pattern = @"^[A-Za-z]+ [A-Za-z]+$";
 			return Regex.IsMatch(str, pattern);
 		}
 	}
