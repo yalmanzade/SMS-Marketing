@@ -21,8 +21,8 @@ static class Error
         {
             using (StreamWriter reader = new StreamWriter(Path + Filename, true))
             {
-                reader.WriteLine(TimeStamp + " - " + ErrorCode + " - " + message);
-                reader.WriteLine($"{TimeStamp} - {ErrorCode} - {CurrentSystem} - {message}");
+                //reader.WriteLine(TimeStamp + " - " + ErrorCode + " - " + message);
+                reader.WriteLine($"{TimeStamp} - Error Code: {ErrorCode} - System: {CurrentSystem} - Message: {message}");
                 Console.WriteLine("Error: {0}", message);
             }
         }

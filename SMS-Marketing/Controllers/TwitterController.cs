@@ -29,15 +29,44 @@ namespace SMS_Marketing.Controllers
         #endregion
 
         // GET: TwitterController
-        public ActionResult Index()
+        public async Task<ActionResult> Index()
         {
-            return View();
+            try
+            {
+                //Authentication Starts
+                AppUser user = await GetCurrentUser();
+                user.CanPost();
+                // End Authentication
+                return View();
+            }
+            catch (Exception ex)
+            {
+                Error.InitializeError("Twitter Auth Index", "100", ex.Message);
+                Error.LogError();
+                TempData["Error"] += ex.Message;
+                return RedirectToAction("Index", "Error");
+            }
         }
 
         #region User Authentication
-        public ActionResult Login(int? id)
+        public async Task<ActionResult> Login(int? id)
         {
-            return RedirectToAction("LoginTwitter", new { @id = id });
+            try
+            {
+                //Authentication Starts
+                AppUser user = await GetCurrentUser();
+                user.CanPost();
+                // End Authentication
+                return RedirectToAction("LoginTwitter", new { @id = id });
+            }
+            catch (Exception ex)
+            {
+                Error.InitializeError("Twitter Auth Index", "100", ex.Message);
+                Error.LogError();
+                TempData["Error"] += ex.Message;
+                return RedirectToAction("Index", "Error");
+            }
+
         }
 
         //GET: TwitterController/Login/3
@@ -263,6 +292,25 @@ namespace SMS_Marketing.Controllers
             {
                 Error.InitializeError("Twitter Authentication", id.ToString(), ex.Message);
                 Error.LogError();
+                TempData["Error"] += ex.Message;
+            }
+            return null;
+        }
+
+        // Gets current User
+        private async Task<AppUser> GetCurrentUser()
+        {
+            AppUser appUser = new();
+            try
+            {
+                if (_signInManager.IsSignedIn(User))
+                {
+                    AppUser? user = await _userManager.GetUserAsync(User);
+                    if (user != null) return user;
+                }
+            }
+            catch (Exception ex)
+            {
                 TempData["Error"] += ex.Message;
             }
             return null;
