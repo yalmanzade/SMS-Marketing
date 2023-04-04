@@ -102,6 +102,10 @@ namespace SMS_Marketing.Controllers
             try
             {
                 var organization = await GetCurrentOrg(id.GetValueOrDefault());
+                if (organization.IsFacebook == true)
+                {
+                    throw new ArgumentException("Facebook already exists. Please delete current facebook");
+                }
                 organization.IsFacebook = true;
 
 				string AppId = HttpContext.Request.Form["AppId"];
