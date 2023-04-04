@@ -101,6 +101,11 @@ namespace SMS_Marketing.Controllers
         {
             try
             {
+                var FacebookExists = _context.Organizations.Where(e => e.Id == id && e.IsFacebook == true);
+                if (FacebookExists != null)
+                {
+                    throw new ArgumentException("Facebook already exists, please disable facebook first.");
+                }
                 string AppId = HttpContext.Request.Form["AppId"];
                 string AccessToken = HttpContext.Request.Form["AccessToken"];
                 string UserScreenName = HttpContext.Request.Form["UserScreenName"];
