@@ -25,7 +25,25 @@
     </ul>
 </section>
 <section class="container">
-    <div class="row">
+
+    @{
+        if (Model.CurrentUser.IsInsight)
+        {
+            <div class="row">
+                <div class="col">
+                    <section class="container pt-2">
+                        <div class="row">
+                            <p class="fs-2">Usage Statistics</p>
+                        </div>
+                        <p class="fs-5">Usage statistics explain how your organization uses the platform.</p>
+                        <partial name="../Organization/Shared/_ReportModal.cshtml" for="@Model.RecentPosts" />
+                    </section>
+                </div>
+                <div class="col">
+
+                </div>
+            </div>
+                <div class="row">
         <div class="col">
             <section class="container pt-2">
                 <div class="row">
@@ -45,4 +63,12 @@
             </section>
         </div>
     </div>
+        }
+        else
+        {
+            <div class="row">
+                <partial name="../Organization/Shared/_NoAccess.cshtml" for="@Model.ManagerName" />
+            </div>
+        }
+    }
 </section>
