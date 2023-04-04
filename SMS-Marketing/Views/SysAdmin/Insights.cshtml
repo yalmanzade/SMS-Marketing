@@ -1,4 +1,5 @@
-﻿@{
+﻿@model SMS_Marketing.Models.Organization
+@{
     ViewData["Title"] = "Insights";
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
@@ -23,7 +24,7 @@
         </li>
         <li class="nav-item">
             <a class="nav-link" href="/SysAdmin/Settings/Twitter">Settings</a>
-        </li>        
+        </li>
     </ul>
 </section>
 
@@ -37,9 +38,70 @@
             <div>
                 <a asp-action="DownloadLog" asp-controller="SysAdmin" class="btn btn-primary btn-lg">
                     <i class="fa-solid fa-download"></i>
-                    Download Logs</a>
+                    Download Logs
+                </a>
             </div>
         </div>
-        <div class="col"></div>
+        <div class="col">
+            @{
+                List<Post> posts = ViewBag.PostList;
+                if (posts != null)
+                {
+                    <p class="fs-2">Usage Statistics</p>
+                    <p class="fs-5">The usage statistcs show all organization's data.</p>
+                    string dateString = DateTime.Today.ToString("yyyy-MM-dd");
+                    string currentmonth = dateString.Substring(4, 2);
+                    string postedmonth;
+                    int i = 0;
+                    int s = 0;
+                    int f = 0;
+                    int t = 0;
+                    int g = 0;
+                    int b = 0;
+                    int m = 0;
+                    foreach (var post in posts)
+                    {
+                        if (post.OnTwitter)
+                        {
+                            t++;
+                        }
+                        if (post.OnFacebook)
+                        {
+                            f++;
+                        }
+                        if (post.OnSMS)
+                        {
+                            s++;
+                        }
+                        if (post.Success == true)
+                        {
+                            g++;
+                        }
+                        if (post.Success == false)
+                        {
+                            b++;
+                        }
+                        postedmonth = post.PostedDate.ToString("yyyy-MM-dd");
+                        postedmonth = postedmonth.Substring(4, 2);
+                        if (currentmonth == postedmonth)
+                        {
+                            m++;
+                        }
+                        i++;
+                    }
+                    <p>Total Posts: @i</p>
+                    <p><i class="fa-brands fa-facebook-f"></i>  Posts: @f</p>
+                    <p><i class="fa-solid fa-comment"></i> Posts: @s</p>
+                    <p><i class="fa-brands fa-twitter"></i> Posts: @t</p>
+                    <p>Successful Posts: @g</p>
+                    <p>Failed Posts: @b</p>
+                    <p>Posts this month: @m</p>
+                }
+                else
+                {
+                    <p>There are no posts yet</p>
+                }
+            }
+        </div>
     </div>
 </section>

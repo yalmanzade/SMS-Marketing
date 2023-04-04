@@ -7,6 +7,7 @@ using SMS_Marketing.API;
 using SMS_Marketing.Areas.Identity.Data;
 using SMS_Marketing.Data;
 using SMS_Marketing.Models;
+using Twilio.TwiML.Messaging;
 
 namespace SMS_Marketing.Controllers;
 
@@ -100,6 +101,11 @@ public class OrganizationController : Controller
             {
                 //Creates new post object for our records.
                 Post post = InitPost(collection);
+                if (post.IsServices == false)
+                {
+                    TempData["Error"] += "You did not select a service.";
+                    return RedirectToAction("Index", "Organization", new { @id = id });
+                }
 
                 //Checks to see if there are any checkboxes checked
                 if (post.IsServices == false)
@@ -160,6 +166,23 @@ public class OrganizationController : Controller
                 }
                 if (post.OnFacebook)
                 {
+                    //bool result = await PostToTwilio(url, postText, id, smsGroup);
+                    TwilioAPI twilioAPI = new TwilioAPI(_context, _authContext, _userManager, _signInManager);
+                    bool result = twilioAPI.PostToTwilio(url, postText, id, smsGroup);
+                    if (result == true)
+                    {
+                        TempData["Success"] += "Texts were sent successfully.";
+                        post.OnSMS = true;
+                    }
+                    else
+                    {
+                        TempData["Error"] += "Failed to send texts.";
+                        post.OnSMS = false;
+                    }
+                }
+                if (post.OnFacebook)
+                {
+
                     FacebookAPI facebook = new FacebookAPI(_context, _authContext, _userManager, _signInManager);
                     bool result = await facebook.PostToFacebook(postText, postPicture, id);
                     if (result)
@@ -170,6 +193,7 @@ public class OrganizationController : Controller
                     {
                         post.OnFacebook = false;
                         TempData["Error"] += " Facebook failed to post.";
+
                     }
                 }
 
@@ -191,6 +215,7 @@ public class OrganizationController : Controller
                 }
                 else
                 {
+
                     TempData["Error"] += "Could not post to sevices.";
                 }
                 return RedirectToAction("Index", new { id = id });
@@ -213,6 +238,7 @@ public class OrganizationController : Controller
 
             if (twitterAuth != null)
             {
+
                 credentialStore.ConsumerKey = _context.AppSettings.First(p => p.Index == AppSettingsAccess.TwitterKey).Value;
                 credentialStore.ConsumerSecret = _context.AppSettings.First(p => p.Index == AppSettingsAccess.TwitterSecret).Value;
                 credentialStore.OAuthTokenSecret = twitterAuth.AccessToken;
@@ -223,6 +249,7 @@ public class OrganizationController : Controller
                 throw new Exception("We could not find your credentials. Please activate Twitter.");
             }
         }
+
         catch (Exception ex)
         {
             TempData["Error"] += ex.Message;

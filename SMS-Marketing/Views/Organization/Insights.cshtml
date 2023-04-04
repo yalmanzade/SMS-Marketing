@@ -2,7 +2,7 @@
 @{
     ViewData["Title"] = "Insights";
 }
-<section class="container"> 
+<section class="container">
     <partial name="../Organization/Shared/_Greeting.cshtml" for="@Model" />
 </section>
 <section class="container">
@@ -25,6 +25,7 @@
     </ul>
 </section>
 <section class="container">
+
     @{
         if (Model.CurrentUser.IsInsight)
         {
@@ -42,6 +43,26 @@
 
                 </div>
             </div>
+                <div class="row">
+        <div class="col">
+            <section class="container pt-2">
+                <div class="row">
+                    <p class="fs-2">Recent Posts</p>
+                </div>
+                <p class="fs-5">These are the most recent posts your organization has made.</p>
+                <partial name="../Organization/Shared/_ReportModal.cshtml" for="@Model.RecentPosts" />
+            </section>
+        </div>
+        <div class="col">
+            <section class="container pt-2">
+                <div class="row">
+                    <p class="fs-2">Usage Statistics</p>
+                </div>
+                <p class="fs-5">This is a look at how your organization uses this platform.</p>
+                <partial name="../Organization/Shared/_SecondReportModal.cshtml" for="@Model.RecentPosts" />
+            </section>
+        </div>
+    </div>
         }
         else
         {
@@ -50,5 +71,4 @@
             </div>
         }
     }
-
 </section>

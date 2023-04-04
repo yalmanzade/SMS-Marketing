@@ -363,29 +363,29 @@ public class SysAdminController : Controller
 
     public async Task<ActionResult> Insights()
     {
-        try
-        {
-            //Authentication Starts
-            AppUser user = await GetCurrentUser();
-            user.IsAdmin();
-            // End Authentication
-
-            return View();
-        }
-        catch (NoUserAccessException ex)
-        {
-            Error.InitializeError("Admin Index", "200", ex.AdminMessage);
-            Error.LogError();
-            TempData["Error"] = ex.Message;
-            return RedirectToAction("Index", "Error");
-        }
-        catch (Exception ex)
-        {
-            Error.InitializeError("Download Logs", "200", ex.Message);
-            Error.LogError();
-            TempData["Error"] = ex.Message;
-            return RedirectToAction("Index", "Error");
-        }
+            try
+            {
+                //Authentication Starts
+                AppUser user = await GetCurrentUser();
+                user.IsAdmin();
+                // End Authentication
+                ViewBag.PostList = _context.Posts.ToList();
+                return View();
+            }
+            catch (NoUserAccessException ex)
+            {
+                Error.InitializeError("Admin Index", "200", ex.AdminMessage);
+                Error.LogError();
+                TempData["Error"] = ex.Message;
+                return RedirectToAction("Index", "Error");
+            }
+            catch (Exception ex)
+            {
+                Error.InitializeError("Download Logs", "200", ex.Message);
+                Error.LogError();
+                TempData["Error"] = ex.Message;
+                return RedirectToAction("Index", "Error");
+            }        
     }
 
     [ActionName("DownloadLog")]
