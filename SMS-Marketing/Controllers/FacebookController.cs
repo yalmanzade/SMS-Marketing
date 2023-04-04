@@ -75,10 +75,20 @@ namespace SMS_Marketing.Controllers
         {
             try
             {
+                var organization = await GetCurrentOrg(id.GetValueOrDefault());
                 FacebookAuth facebook = await _context.FacebookAuth.Where(e => e.OrganizationId == id).FirstAsync();
+                if (organization.IsFacebook == true)
+                {
+                    organization.IsFacebook = false;
+                    _context.Organizations.Update(organization);
+                    await _context.SaveChangesAsync();
+                }
                 if ( facebook != null)
                 {
                     _context.FacebookAuth.Remove(facebook);
+                    await _context.SaveChangesAsync();
+                    organization.IsFacebook = false;
+                    _context.Organizations.Update(organization);
                     await _context.SaveChangesAsync();
                     return RedirectToAction("Index", "Organization", new { @id = id });
                 }
