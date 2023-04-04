@@ -119,6 +119,8 @@ namespace SMS_Marketing.Controllers
                 {
                     await _context.FacebookAuth.AddAsync(facebookAuth);
                     await _context.SaveChangesAsync();
+                    _context.Organizations.Update(organization);
+                    await _context.SaveChangesAsync();
                     return RedirectToAction("Index", "Organization", new { @id = id });
                 }
                 else
