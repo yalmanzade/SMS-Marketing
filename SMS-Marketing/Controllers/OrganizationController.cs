@@ -7,6 +7,7 @@ using SMS_Marketing.API;
 using SMS_Marketing.Areas.Identity.Data;
 using SMS_Marketing.Data;
 using SMS_Marketing.Models;
+using Twilio.TwiML.Messaging;
 
 namespace SMS_Marketing.Controllers;
 
@@ -94,12 +95,17 @@ public class OrganizationController : Controller
     [ValidateAntiForgeryToken]
     public async Task<ActionResult> SubmitPost(string postText, IFormFile postPicture, int? id, int smsGroup, string? url,
                                                    IFormCollection collection)
-    {
-        if (id == null) throw new Exception("This is not a valid Organization ID");
-        try
         {
-            //Creates new post object for our records.
-            Post post = InitPost(collection);
+            if (id == null) throw new Exception("This is not a valid Organization ID");
+            try
+            {
+                //Creates new post object for our records.
+                Post post = InitPost(collection);
+                if (post.IsServices == false)
+                {
+                    TempData["Error"] += "You did not select a service.";
+                    return RedirectToAction("Index", "Organization", new { @id = id });
+                }
 
             //Checks to see if there are any checkboxes checked
             if (post.IsServices == false)
@@ -142,36 +148,36 @@ public class OrganizationController : Controller
                 }
             }
 
-            if (post.OnSMS)
-            {
-                //bool result = await PostToTwilio(url, postText, id, smsGroup);
-                TwilioAPI twilioAPI = new TwilioAPI(_context, _authContext, _userManager, _signInManager);
-                bool result = twilioAPI.PostToTwilio(url, postText, id, smsGroup);
-                if (result == true)
+                if (post.OnSMS)
                 {
-                    TempData["Success"] += "Texts were sent successfully.";
-                    post.OnSMS = true;
+                    //bool result = await PostToTwilio(url, postText, id, smsGroup);
+                    TwilioAPI twilioAPI = new TwilioAPI(_context, _authContext, _userManager, _signInManager);
+                    bool result = twilioAPI.PostToTwilio(url, postText, id, smsGroup);
+                    if (result == true)
+                    {
+                        TempData["Success"] += "Texts were sent successfully.";
+                        post.OnSMS = true;
+                    }
+                    else
+                    {
+                        TempData["Error"] += "Failed to send texts.";
+                        post.OnSMS = false;
+                    }
                 }
-                else
+                if (post.OnFacebook)
                 {
-                    TempData["Error"] += "Failed to send texts.";
-                    post.OnSMS = false;
+                    FacebookAPI facebook = new FacebookAPI(_context, _authContext, _userManager, _signInManager);
+                    bool result = await facebook.PostToFacebook(postText, postPicture, id);
+                    if (result)
+                    {
+                        TempData["Success"] += " Facebook successfully posted.";
+                    }
+                    else
+                    {
+                        post.OnFacebook = false;
+                        TempData["Error"] += " Facebook failed to post.";
+                    }
                 }
-            }
-            if (post.OnFacebook)
-            {
-                FacebookAPI facebook = new FacebookAPI(_context, _authContext, _userManager, _signInManager);
-                bool result = await facebook.PostToFacebook(postText, postPicture, id);
-                if (result)
-                {
-                    TempData["Success"] += " Facebook successfully posted.";
-                }
-                else
-                {
-                    post.OnFacebook = false;
-                    TempData["Error"] += " Facebook failed to post.";
-                }
-            }
 
             //Checks to see if the post is Valid
             if (post.IsServices)
@@ -186,21 +192,21 @@ public class OrganizationController : Controller
                 post.AuthorName = $"{appUser.FirstName} {appUser.LastName}";
                 post.Success = true;
 
-                //Saves post to database
-                await LogPost(post);
+                    //Saves post to database
+                    await LogPost(post);
+                }
+                else
+                {
+                    TempData["Error"] += "Could not post to sevices.";
+                }
+                return RedirectToAction("Index", new { id = id });
             }
-            else
+            catch (Exception ex)
             {
-                TempData["Error"] += "Could not post to sevices.";
+                TempData["Error"] += ex.Message;
+                return RedirectToAction("Index", "Error");
             }
-            return RedirectToAction("Index", new { id = id });
         }
-        catch (Exception ex)
-        {
-            TempData["Error"] += ex.Message;
-            return RedirectToAction("Index", "Error");
-        }
-    }
 
     public async Task<SessionStateCredentialStore> GetCredentialStore(int? id)
     {
@@ -213,6 +219,7 @@ public class OrganizationController : Controller
 
             if (twitterAuth != null)
             {
+
                 credentialStore.ConsumerKey = _context.AppSettings.First(p => p.Index == AppSettingsAccess.TwitterKey).Value;
                 credentialStore.ConsumerSecret = _context.AppSettings.First(p => p.Index == AppSettingsAccess.TwitterSecret).Value;
                 credentialStore.OAuthTokenSecret = twitterAuth.AccessToken;
@@ -223,6 +230,7 @@ public class OrganizationController : Controller
                 throw new Exception("We could not find your credentials. Please activate Twitter.");
             }
         }
+
         catch (Exception ex)
         {
             TempData["Error"] += ex.Message;
