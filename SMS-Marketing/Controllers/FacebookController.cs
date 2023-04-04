@@ -101,12 +101,13 @@ namespace SMS_Marketing.Controllers
         {
             try
             {
-                var FacebookExists = _context.Organizations.Where(e => e.Id == id && e.IsFacebook == true);
-                if (FacebookExists != null)
+                var organization = await GetCurrentOrg(id.GetValueOrDefault());
+                if (organization.IsFacebook == true)
                 {
-                    throw new ArgumentException("Facebook already exists, please disable facebook first.");
+                    throw new ArgumentException("Facebook account already synced. Please disable current facebook before adding this one.");
                 }
-                string AppId = HttpContext.Request.Form["AppId"];
+                organization.IsFacebook = true;
+				string AppId = HttpContext.Request.Form["AppId"];
                 string AccessToken = HttpContext.Request.Form["AccessToken"];
                 string UserScreenName = HttpContext.Request.Form["UserScreenName"];
                 FacebookAuth facebookAuth = new FacebookAuth();
