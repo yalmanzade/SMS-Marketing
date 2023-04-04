@@ -1,9 +1,10 @@
-﻿<section class="container">
+﻿@model Organization
+<section class="container">
     <h1>Organization: @Model.Name</h1>
 </section>
 <section class="container">
     <h1>
-        @Model.ManagerName, Welcome to your organization.
+        @Model.CurrentUser.FullName, Welcome to your organization.
     </h1>
 </section>
 
