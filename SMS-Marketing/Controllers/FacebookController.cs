@@ -75,10 +75,20 @@ namespace SMS_Marketing.Controllers
         {
             try
             {
+                var organization = await GetCurrentOrg(id.GetValueOrDefault());
                 FacebookAuth facebook = await _context.FacebookAuth.Where(e => e.OrganizationId == id).FirstAsync();
+                if (organization.IsFacebook == true)
+                {
+                    organization.IsFacebook = false;
+                    _context.Organizations.Update(organization);
+                    await _context.SaveChangesAsync();
+                }
                 if ( facebook != null)
                 {
                     _context.FacebookAuth.Remove(facebook);
+                    await _context.SaveChangesAsync();
+                    organization.IsFacebook = false;
+                    _context.Organizations.Update(organization);
                     await _context.SaveChangesAsync();
                     return RedirectToAction("Index", "Organization", new { @id = id });
                 }
@@ -101,7 +111,14 @@ namespace SMS_Marketing.Controllers
         {
             try
             {
-                string AppId = HttpContext.Request.Form["AppId"];
+                var organization = await GetCurrentOrg(id.GetValueOrDefault());
+                if (organization.IsFacebook == true)
+                {
+                    throw new ArgumentException("Facebook already exists. Please delete current facebook");
+                }
+                organization.IsFacebook = true;
+
+				string AppId = HttpContext.Request.Form["AppId"];
                 string AccessToken = HttpContext.Request.Form["AccessToken"];
                 string UserScreenName = HttpContext.Request.Form["UserScreenName"];
                 FacebookAuth facebookAuth = new FacebookAuth();
@@ -109,9 +126,12 @@ namespace SMS_Marketing.Controllers
                 facebookAuth.AppId = AppId;
                 facebookAuth.AccessToken = AccessToken;
                 facebookAuth.UserScreenName = UserScreenName;
-                if (TryValidateModel(facebookAuth))
+                if (TryValidateModel(facebookAuth) && TryValidateModel(organization))
                 {
-                    await _context.FacebookAuth.AddAsync(facebookAuth);
+                    _context.Organizations.Update(organization);
+					await _context.SaveChangesAsync();
+
+					await _context.FacebookAuth.AddAsync(facebookAuth);
                     await _context.SaveChangesAsync();
                     return RedirectToAction("Index", "Organization", new { @id = id });
                 }
