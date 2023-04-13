@@ -94,6 +94,16 @@ namespace SMS_Marketing.Controllers
                 {
                     customer.PhoneNumber = "+1" + customer.PhoneNumber;
                 }
+                var CheckReg = _context.Customers.SingleOrDefault(e => e.OrganizationId == customer.OrganizationId && e.PhoneNumber == customer.PhoneNumber);
+                if (CheckReg != null && CheckReg.IsActive == false) 
+                {
+                    CheckReg.IsActive = true;
+                    _context.SaveChanges();
+                }
+                if (CheckReg != null && CheckReg.IsActive == true)
+                {
+                    return RedirectToAction("Customers", "Organization", new { @id = id });
+                }
                 if (TryValidateModel(customer))
                 {
                     await _context.Customers.AddAsync(customer);
