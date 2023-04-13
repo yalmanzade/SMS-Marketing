@@ -85,10 +85,9 @@ public class AppUser : IdentityUser
     public void CanPost()
     {
         if (this == null) throw new Exception("Please log in to perform this operation.");
-        if (this.IsPost == false) throw new Exception($"{FullName}Admin Portal.");
+        if (this.IsPost == false) throw new Exception($"{FullName}, You do not have access this resource.");
     }
 }
-
 
 [Serializable]
 class NoUserAccessException : Exception

@@ -30,39 +30,27 @@
         if (Model.CurrentUser.IsInsight)
         {
             <div class="row">
-                <div class="col">
-                    <section class="container pt-2">
-                        <div class="row">
-                            <p class="fs-2">Usage Statistics</p>
-                        </div>
-                        <p class="fs-5">Usage statistics explain how your organization uses the platform.</p>
-                        <partial name="../Organization/Shared/_ReportModal.cshtml" for="@Model.RecentPosts" />
-                    </section>
-                </div>
-                <div class="col">
-
+                <div class="row">
+                    <div class="col">
+                        <section class="container pt-2">
+                            <div class="row">
+                                <p class="fs-2">Recent Posts</p>
+                            </div>
+                            <p class="fs-5">These are the most recent posts your organization has made.</p>
+                            <partial name="../Organization/Shared/_ReportModal.cshtml" for="@Model.RecentPosts" />
+                        </section>
+                    </div>
+                    <div class="col">
+                        <section class="container pt-2">
+                            <div class="row">
+                                <p class="fs-2">Usage Statistics</p>
+                            </div>
+                            <p class="fs-5">This is a look at how your organization uses this platform.</p>
+                            <partial name="../Organization/Shared/_SecondReportModal.cshtml" for="@Model.RecentPosts" />
+                        </section>
+                    </div>
                 </div>
             </div>
-                <div class="row">
-        <div class="col">
-            <section class="container pt-2">
-                <div class="row">
-                    <p class="fs-2">Recent Posts</p>
-                </div>
-                <p class="fs-5">These are the most recent posts your organization has made.</p>
-                <partial name="../Organization/Shared/_ReportModal.cshtml" for="@Model.RecentPosts" />
-            </section>
-        </div>
-        <div class="col">
-            <section class="container pt-2">
-                <div class="row">
-                    <p class="fs-2">Usage Statistics</p>
-                </div>
-                <p class="fs-5">This is a look at how your organization uses this platform.</p>
-                <partial name="../Organization/Shared/_SecondReportModal.cshtml" for="@Model.RecentPosts" />
-            </section>
-        </div>
-    </div>
         }
         else
         {
