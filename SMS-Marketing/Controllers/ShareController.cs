@@ -22,6 +22,7 @@ public class ShareController : Controller
     private readonly SignInManager<AppUser> _signInManager;
 
     #endregion
+
     #region Constructor
 
     public ShareController(UserAuthDbContext userAuth, ApplicationDbContext context, ILogger<HomeController> logger, UserManager<AppUser> userManager,
@@ -86,7 +87,13 @@ public class ShareController : Controller
                 //Checks if user already exists.
                 Customer? customer = await _context.Customers.FirstOrDefaultAsync(
                     x => x.PhoneNumber == customerForm.PhoneNumber && x.OrganizationId == customerForm.Id);
-                if (customer != null) return View("SubscribeSuccess");
+                if (customer != null)
+                {
+                    customer.IsActive = true;
+                    _context.Customers.Update(customer);
+                    await _context.SaveChangesAsync();
+                    return View("SubscribeSuccess");
+                };
 
                 Models.Group? group = _context.Groups
                                .Where(g => g.OrganizationId == customerForm.Id && g.IsDefault == true)

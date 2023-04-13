@@ -132,7 +132,7 @@ public class OrganizationController : Controller
                 TwitterAPI twitterAPI = new(postText, postPicture, url, twitterContext);
 
                 //Posting to Twitter
-                bool result = true;
+                bool result = await twitterAPI.PostTweet();
                 //bool result = await twitterAPI.PostTweet();
 
                 //If Tweet was posted successfully
