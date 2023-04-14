@@ -22,16 +22,12 @@
                     {
                         <p class="fs-2">Usage Statistics</p>
                         <p class="fs-5">The usage statistcs show all organization's data.</p>
-                        string dateString = DateTime.Today.ToString("yyyy-MM-dd");
-                        string currentmonth = dateString.Substring(4, 2);
-                        string postedmonth;
                         int i = 0;
                         int s = 0;
                         int f = 0;
                         int t = 0;
                         int g = 0;
                         int b = 0;
-                        int m = 0;
                         foreach (var post in Model)
                         {
                             if (post.OnTwitter)
@@ -54,12 +50,6 @@
                             {
                                 b++;
                             }
-                            postedmonth = post.PostedDate.ToString("yyyy-MM-dd");
-                            postedmonth = postedmonth.Substring(4, 2);
-                            if (currentmonth == postedmonth)
-                            {
-                                m++;
-                            }
                             i++;
                         }
                         <p>Total Posts: @i</p>
@@ -68,7 +58,6 @@
                         <p><i class="fa-brands fa-twitter"></i> Posts: @t</p>
                         <p>Successful Posts: @g</p>
                         <p>Failed Posts: @b</p>
-                        <p>Posts this month: @m</p>
                     }    
                 }
             </div>
