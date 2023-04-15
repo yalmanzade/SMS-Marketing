@@ -7,8 +7,9 @@
             <p class="fs-5">Use this QR code to onboard customers.</p>
             @{
                 string size = ";size=100x100";
+                //This generates the QR image.
                 string url = $"https://api.qrserver.com/v1/create-qr-code/?data={Model.SharingUrl}";
-                //<img src="@url" alt="sharing url" class="img-fluid" height="200" width="200" />
+                <img src="@url" alt="sharing url" class="img-fluid" height="200" width="200" />
             }
             <div>
                 <p>QR Code Goes Here</p>
