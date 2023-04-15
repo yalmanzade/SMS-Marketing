@@ -478,7 +478,8 @@ public class OrganizationController : Controller
             if (id == null) throw new Exception("Null Organization Id");
             posts = _context.Posts
                              .Where(x => x.OrganizationId == id)
-                             .Take(5)
+                             .OrderByDescending(x => x.PostedDate)
+                             //.Take(5)
                              .ToList();
             return posts;
         }

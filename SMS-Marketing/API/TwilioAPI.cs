@@ -40,6 +40,8 @@ namespace SMS_Marketing.API
                 List<Customer> customers = new List<Customer>();
                 customers = _context.Customers
                             .Where(x => x.GroupId == smsGroup)
+                            .GroupBy(x => x.PhoneNumber)
+                            .Select(x => x.First())
                             .ToList();
                 TwilioClient.Init(accountSid, authToken);
                 if (customers == null) throw new Exception ("No customers were selected");
