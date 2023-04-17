@@ -1,5 +1,6 @@
 ﻿using LinqToTwitter;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http.Extensions;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
@@ -43,6 +44,8 @@ public class OrganizationController : Controller
             organization = await GetCurrentOrg(id);
             organization.Groups = GetGroups(id);
             organization.CurrentUser = await GetCurrentUser();
+            string url = Request.GetDisplayUrl();
+            organization.SharingUrl = url;
         }
         catch (Exception ex)
         {

@@ -37,10 +37,8 @@ public class Organization
     [NotMapped]
     public string SharingUrl
     {
-        get
-        {
-            return $"https://localhost:7076/Share/Index/{this.Id.ToString()}";
-        }
+        get { return $"{SharingUrl}{this.Id.ToString()}"; }
+        set { SharingUrl = value; }
     }
     [NotMapped]
     public AppUser CurrentUser = new();
