@@ -12,8 +12,7 @@ public class TwitterAPI
 
     //Private Members
     private string TwitterBody { get; set; } = string.Empty;
-    private Stream FileStream { get; set; }
-    private byte[] Bytes = null;
+    private Stream? FileStream { get; set; }
     public string MediaCategory { get; set; } = "tweet_image";
 
     public TwitterAPI(string boby, IFormFile? postImage, string url, TwitterContext? twitterContext)

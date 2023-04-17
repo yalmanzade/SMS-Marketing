@@ -86,7 +86,7 @@ public class TwitterController : Controller
                 if (organization == null || organization.IsActive == false) throw new Exception("Not a valid organization.");
                 if (twitterAuth == null || organization.IsTwitter == false)
                 {
-                    //await auth.CredentialStore.ClearAsync();
+
                     var auth = new MvcAuthorizer
                     {
                         CredentialStore = new SessionStateCredentialStore(HttpContext.Session)
@@ -97,10 +97,13 @@ public class TwitterController : Controller
                             ConsumerSecret = _context.AppSettings.First(p => p.Index == AppSettingsAccess.TwitterSecret).Value
                         }
                     };
+                    //await auth.CredentialStore.ClearAsync();
                     //string twitterCallbackUrl = Request.GetDisplayUrl().Replace("Login", "CompleteLogin");
                     TempData["CurrentOrg"] = id;
                     //string twitterCallbackUrl = "https://localhost:7076/Organization/MyOrganizations/";
-                    string twitterCallbackUrl = "https://localhost:7076/Twitter/CompleteLogin/";
+                    //string twitterCallbackUrl = "https://localhost:7076/Twitter/CompleteLogin/";
+                    string twitterCallbackUrl = Request.GetDisplayUrl().Replace("LoginTwitter", "CompleteLogin");
+                    twitterCallbackUrl = twitterCallbackUrl.Replace(id.ToString(), "");
                     return await auth.BeginAuthorizationAsync(new Uri(twitterCallbackUrl));
                 };
                 if (twitterAuth.AccessToken != null && twitterAuth.OAuthToken != null)
@@ -117,6 +120,7 @@ public class TwitterController : Controller
                             ConsumerSecret = consumerSecret
                         }
                     };
+                    TempData["Success"] = "Twitter Authentication Successful";
                     //await SaveTwitterOrgChanges((int)id);
                     return RedirectToAction("Index", "Organization", new { @id = id });
                 }
