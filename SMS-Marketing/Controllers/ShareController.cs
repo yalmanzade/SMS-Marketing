@@ -6,6 +6,7 @@ using Microsoft.EntityFrameworkCore;
 using SMS_Marketing.Areas.Identity.Data;
 using SMS_Marketing.Data;
 using SMS_Marketing.Models;
+using System.Configuration;
 using System.Text.RegularExpressions;
 
 namespace SMS_Marketing.Controllers;
@@ -20,19 +21,21 @@ public class ShareController : Controller
     private readonly ILogger<HomeController> _logger;
     private readonly UserManager<AppUser> _userManager;
     private readonly SignInManager<AppUser> _signInManager;
+    private IConfiguration _config;
 
     #endregion
 
     #region Constructor
 
     public ShareController(UserAuthDbContext userAuth, ApplicationDbContext context, ILogger<HomeController> logger, UserManager<AppUser> userManager,
-        SignInManager<AppUser> signInManage)
+        SignInManager<AppUser> signInManager, IConfiguration configuration)
     {
         _userManager = userManager;
-        _signInManager = signInManage;
+        _signInManager = signInManager;
         _logger = logger;
         _context = context;
         _authContext = userAuth;
+        _config = configuration;
     }
 
     #endregion
@@ -123,7 +126,7 @@ public class ShareController : Controller
     }
 
     // GET: ShareController/Unsubscribe
-    public async Task<ActionResult> Unsubscribe(int? id)
+    public ActionResult Unsubscribe(int? id)
     {
         try
         {
@@ -181,12 +184,15 @@ public class ShareController : Controller
     #region Landing Page
     public ActionResult AboutUs()
     {
+        var configuration = _config.GetSection("AppSettings").GetSection("AppName").Value;
+        TempData["AppName"] = configuration;
         return View();
     }
 
     #endregion
 
     #region Helper Methods
+    //Not in Use
     public bool PhoneIsValid(string phone)
     {
         //const string bluePrint = "^([\\+]?1[-]?|[0])?[1-9][0-9]{8}$";

@@ -10,7 +10,7 @@ public class Organization
     public int Id { get; set; }
 
     [Required]
-    
+
     public string Name { get; set; } = string.Empty;
 
     [Required]
@@ -35,15 +35,14 @@ public class Organization
     [NotMapped]
     public List<Post> RecentPosts = new();
     [NotMapped]
-    public string SharingUrl
-    {
-        get
-        {
-            return $"https://localhost:7076/Share/Index/{this.Id.ToString()}";
-        }
-    }
-    [NotMapped]
     public AppUser CurrentUser = new();
+    [NotMapped]
+    public string SharingUrl { get; set; }
+
+    public string GetSharingUrl()
+    {
+        return SharingUrl.Replace("Organization", "Share");
+    }
 }
 public class CustomerViewModel
 {

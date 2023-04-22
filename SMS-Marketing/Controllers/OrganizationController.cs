@@ -1,5 +1,6 @@
 ﻿using LinqToTwitter;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http.Extensions;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
@@ -18,16 +19,18 @@ public class OrganizationController : Controller
     private readonly UserAuthDbContext _authContext;
     private readonly UserManager<AppUser> _userManager;
     private readonly SignInManager<AppUser> _signInManager;
+    private readonly IConfiguration _config;
     #endregion
 
     #region Constructor
     public OrganizationController(ApplicationDbContext context, UserAuthDbContext authDbContext,
-                                     UserManager<AppUser> userManager, SignInManager<AppUser> signInManager)
+                                     UserManager<AppUser> userManager, SignInManager<AppUser> signInManager, IConfiguration config)
     {
         _userManager = userManager;
         _signInManager = signInManager;
         _context = context;
         _authContext = authDbContext;
+        _config = config;
     }
 
     #endregion
@@ -41,6 +44,8 @@ public class OrganizationController : Controller
             organization = await GetCurrentOrg(id);
             organization.Groups = GetGroups(id);
             organization.CurrentUser = await GetCurrentUser();
+            string url = Request.GetDisplayUrl();
+            organization.SharingUrl = url;
         }
         catch (Exception ex)
         {
