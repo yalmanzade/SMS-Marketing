@@ -13,7 +13,7 @@
         if (user != null)
         {
             string fullName = $"{user.FirstName} {user.LastName}";
-            <div class="text-center">
+            <div class="text-center m-1">
                 <h1 class="display-4">Welcome Back, @fullName</h1>
             </div>
         }
@@ -32,7 +32,7 @@
             <div class="card">
                 <div class="card-body">
                     <h5 class="card-title">Manage your organization</h5>
-                    <p class="card-text">With supporting text below as a natural lead-in to additional content.</p>
+                    <p class="card-text">Send messages, manage user and explore insights.</p>
                     <a asp-action="MyOrganizations" asp-controller="Organization" class="btn btn-primary btn-lg">
                         <i class="fa-solid fa-list-check"></i>
                         Manage Organization
